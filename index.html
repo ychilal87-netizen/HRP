@@ -16,6 +16,12 @@
         .active-tab { display: block; }
         .nav-active { color: #fbbf24; border-top: 2px solid #fbbf24; }
         .captcha-box { background: #334155; font-family: 'Courier New', Courier, monospace; letter-spacing: 5px; user-select: none; }
+        
+        /* ለ Live Transaction ማሸብለያ የተጨመረ ስታይል */
+        .ticker-container { height: 160px; overflow: hidden; position: relative; }
+        .ticker-wrapper { position: absolute; width: 100%; animation: scroll-ticker 20s linear infinite; }
+        .ticker-wrapper:hover { animation-play-state: paused; }
+        @keyframes scroll-ticker { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
     </style>
 </head>
 <body class="pb-24">
@@ -97,6 +103,18 @@
                     </thead>
                     <tbody id="inv-table-body"></tbody>
                 </table>
+            </div>
+
+            <!-- አዲስ የተጨመረ: Live Transaction ክፍል (ከሰንጠረዡ በታች) -->
+            <div class="glass p-4 rounded-3xl">
+                <h3 class="text-center font-bold text-green-400 mb-3 text-sm uppercase flex items-center justify-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> LIVE TRANSACTIONS
+                </h3>
+                <div class="ticker-container">
+                    <div id="live-ticker" class="ticker-wrapper space-y-2">
+                        <!-- እዚህ ውስጥ በጃቫስክሪፕቱ የ 30 ሰዎች መረጃ በራሱ ይመረታል -->
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -242,7 +260,6 @@
             {id: 5, price: 20000, daily: 1400, img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=200"}
         ];
 
-        // ገጹ ሲከፈት የጋባዥ ቁጥርን በራሱ እንዲሞላ
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const refCode = urlParams.get('rf');
@@ -256,6 +273,7 @@
                 }
             }
             generateCaptcha();
+            generateLiveTransactions(); // የቀጥታ ማስመስያ ዝውውር እንዲጀምር መጥራት
         });
 
         window.toggleAuth = (m) => {
@@ -311,18 +329,25 @@
         async function loadSalaryUI() {
             const usersSnap = await get(ref(db, 'users'));
             let levelACount = 0;
-            usersSnap.forEach(u => { if(u.val().inviteBy === userData.myInvite) levelACount++; });
+            
+            usersSnap.forEach(u => { 
+                const memberData = u.val();
+                if(memberData.inviteBy === userData.myInvite && (memberData.vip || 0) > 0) { 
+                    levelACount++; 
+                } 
+            });
+            
             let sHtml = "";
             salaryRules.forEach(r => {
                 const isClaimed = (userData.claimedLevels || []).includes(r.id);
                 const canClaim = levelACount >= r.members && !isClaimed;
-                sHtml += `<div class="glass p-3 rounded-xl flex justify-between items-center"><div class="text-left"><p class="font-bold text-yellow-500">Salary Lvl ${r.id}</p><p class="text-[9px] opacity-60">${levelACount}/${r.members} A-Members</p><p class="text-[10px] text-green-400">${r.amount} ETB</p></div><button onclick="claimSalary(${r.id}, ${r.amount}, ${r.members}, ${levelACount})" class="px-4 py-1 rounded-lg text-[10px] font-bold ${canClaim ? 'bg-green-600' : 'bg-gray-700 opacity-50'}" ${!canClaim ? 'disabled' : ''}>${isClaimed ? 'CLAIMED' : 'CLAIM'}</button></div>`;
+                sHtml += `<div class="glass p-3 rounded-xl flex justify-between items-center"><div class="text-left"><p class="font-bold text-yellow-500">Salary Lvl ${r.id}</p><p class="text-[9px] opacity-60">${levelACount}/${r.members} Active A-Members</p><p class="text-[10px] text-green-400">${r.amount} ETB</p></div><button onclick="claimSalary(${r.id}, ${r.amount}, ${r.members}, ${levelACount})" class="px-4 py-1 rounded-lg text-[10px] font-bold ${canClaim ? 'bg-green-600' : 'bg-gray-700 opacity-50'}" ${!canClaim ? 'disabled' : ''}>${isClaimed ? 'CLAIMED' : 'CLAIM'}</button></div>`;
             });
             document.getElementById('salary-list').innerHTML = sHtml;
         }
 
         window.claimSalary = async (id, amount, required, actual) => {
-            if(actual < required) return alert("Not enough A-Members!");
+            if(actual < required) return alert("Not enough Active A-Members!");
             const claimed = userData.claimedLevels || [];
             if(claimed.includes(id)) return alert("Already claimed!");
             claimed.push(id);
@@ -467,19 +492,64 @@
         function renderRent() {
             let rGrid = ""; let tBody = "";
             rentLevels.forEach(l => {
-                rGrid += `<div class="glass p-4 rounded-3xl flex items-center gap-4"><img src="${l.img}" class="w-16 h-16 rounded-xl object-cover"><div class="flex-1"><h4 class="font-bold text-sm">House VIP ${l.id}</h4><p class="text-[10px] text-gray-400">Daily: ${l.daily} ETB</p><button onclick="rentHouse(${l.id})" class="mt-2 bg-yellow-500 text-black px-4 py-1 rounded-lg text-xs font-bold uppercase">Rent ${l.price} ETB</button></div></div>`;
-                tBody += `<tr class="border-b border-white/5"><td>${l.id}</td><td>${l.price}</td><td class="text-green-400">${l.daily}</td></tr>`;
+                tBody += `<tr class="border-b border-white/10"><td class="p-2 font-bold text-green-400">VIP ${l.id}</td><td class="p-2">${l.price} ETB</td><td class="p-2 text-yellow-500">${l.daily} ETB</td></tr>`;
+                rGrid += `<div class="glass p-4 rounded-3xl flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <img src="${l.img}" class="w-16 h-16 rounded-2xl object-cover">
+                        <div>
+                            <h4 class="font-bold text-sm">VIP HOUSE ${l.id}</h4>
+                            <p class="text-[10px] opacity-60">Price: ${l.price} ETB</p>
+                            <p class="text-[10px] text-yellow-500">Daily: ${l.daily} ETB</p>
+                        </div>
+                    </div>
+                    <button onclick="rentHouse(${l.id})" class="bg-yellow-500 text-black font-bold px-4 py-2 rounded-xl text-xs uppercase">Rent</button>
+                </div>`;
             });
-            document.getElementById('rent-grid').innerHTML = rGrid;
             document.getElementById('inv-table-body').innerHTML = tBody;
+            document.getElementById('rent-grid').innerHTML = rGrid;
         }
 
-        window.switchTab = (t) => {
+        window.switchTab = (tab) => {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active-tab'));
-            document.getElementById(t + '-tab').classList.add('active-tab');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
+            document.getElementById(tab + '-tab').classList.add('active-tab');
             event.currentTarget.classList.add('nav-active');
         };
+
+        // አዲስ የተጨመረ: የ 30 ሰዎች Live Transaction ማስመስያ መረጃ ማመንጫ ፈንክሽን
+        function generateLiveTransactions() {
+            const tickerContainer = document.getElementById('live-ticker');
+            let htmlContent = "";
+            const types = ["Deposit", "Withdraw"];
+            
+            // የ 30 ሰዎች ዝርዝር መፍጠር
+            for (let i = 0; i < 30; i++) {
+                // የዘፈቀደ የሞባይል ቁጥር (የመጨረሻዎቹ 3 ቁጥሮች ብቻ እንዲታዩ)
+                const randomMiddle = Math.floor(100 + Math.random() * 900);
+                const randomEnd = Math.floor(1000 + Math.random() * 9000);
+                const maskedPhone = `+2519***${randomEnd.toString().substring(2)}`;
+                
+                // የዘፈቀደ የገንዘብ መጠን ከ 200 እስከ 10000
+                const amount = Math.floor(200 + Math.random() * 9800);
+                const type = types[Math.floor(Math.random() * types.length)];
+                const badgeColor = type === "Deposit" ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-red-500/20 text-red-400 border-red-500/30";
+                
+                htmlContent += `
+                    <div class="flex justify-between items-center bg-black/20 p-2 rounded-xl border border-white/5 text-[11px]">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full ${type === 'Deposit' ? 'bg-green-500' : 'bg-red-500'}"></span>
+                            <span class="font-mono text-gray-300">${maskedPhone}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="px-2 py-0.5 rounded-md border text-[9px] font-bold uppercase ${badgeColor}">${type}</span>
+                            <span class="font-bold text-yellow-500">${amount} ETB</span>
+                        </div>
+                    </div>`;
+            }
+            
+            // ማለቂያ የሌለው አኒሜሽን (infinite scroll) እንዲሰራ መረጃውን ደግመን እንጨምረዋለን
+            tickerContainer.innerHTML = htmlContent + htmlContent;
+        }
     </script>
 </body>
 </html>
