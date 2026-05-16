@@ -1,795 +1,485 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>HR Investment Platform | Official</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <style>
-
         @keyframes move-text { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-
         .moving-text { white-space: nowrap; animation: move-text 15s linear infinite; }
-
         body { background: #0f172a; font-family: 'Inter', sans-serif; color: white; overflow-x: hidden; }
-
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-
         .tab-content { display: none; }
-
         .active-tab { display: block; }
-
         .nav-active { color: #fbbf24; border-top: 2px solid #fbbf24; }
-
         .captcha-box { background: #334155; font-family: 'Courier New', Courier, monospace; letter-spacing: 5px; user-select: none; }
-
     </style>
-
 </head>
-
 <body class="pb-24">
-
     <div class="bg-blue-900 overflow-hidden py-2 sticky top-0 z-50">
-
         <div id="ticker-text" class="moving-text font-bold text-xs uppercase" 
-
              data-en="🏢 HR HOUSE RENT INVESTMENT - RENT, INVITE, AND EARN MONTHLY SALARY! - 📞 CS: @HRPservice 🏢" 
-
              data-am="🏢 የኤች አር የቤት ኪራይ ኢንቨስትመንት - ይከራዩ፣ ይጋብዙ እና ወርሃዊ ደመወዝ ያግኙ! 🏢" 
-
              data-or="🏢 INVISTIMENTII KIRAAYII MANAA HR - KIRAAYYIFFADHAA, AFFEERAA, JI'AAN KAFALTII ARGADHAA! 🏢" 
-
              data-tg="🏢 ኢንቨስትመንት ኪራይ ገዛ HR - ተኻረዩ፣ ዓድሙ፣ ብወርሒ ደሞዝ ተቀበሉ! 🏢">
-
             🏢 HR HOUSE RENT INVESTMENT - RENT, INVITE, AND EARN MONTHLY SALARY! - 📞 CS: @HRPservice 🏢
-
         </div>
-
     </div>
+
     <section id="auth-section" class="max-w-md mx-auto mt-10 p-6 glass rounded-3xl mx-4">
-
         <div class="flex justify-around mb-8 border-b border-gray-700 pb-3">
-
             <button onclick="toggleAuth('reg')" id="reg-btn" class="text-xl font-bold border-b-4 border-yellow-500">Register</button>
-
             <button onclick="toggleAuth('login')" id="login-btn" class="text-xl font-bold opacity-50">Login</button>
-
         </div>
 
         <div id="reg-form" class="space-y-4">
-
             <div class="flex">
-
                 <span class="bg-gray-700 p-3 rounded-l-xl border border-gray-500">+251</span>
-
                 <input type="number" id="reg-phone" placeholder="9..." class="flex-1 bg-black/40 p-3 rounded-r-xl border border-gray-500 outline-none text-white">
-
             </div>
-
             <input type="password" id="reg-pass" placeholder="Password" class="w-full bg-black/40 p-3 rounded-xl border border-gray-500 outline-none">
-
             <input type="password" id="reg-pin" placeholder="Withdrawal PIN" class="w-full bg-black/40 p-3 rounded-xl border border-gray-500 outline-none">
-
-            <input type="text" id="reg-invite" placeholder="Invitation Code" class="w-full bg-black/40 p-3 rounded-xl border border-gray-500 outline-none">
+            
+            <div class="flex gap-2">
+                <input type="text" id="reg-invite" placeholder="የግብዣ ኮድ" class="flex-1 bg-black/40 p-3 rounded-xl border border-gray-500 outline-none uppercase text-white font-bold">
+                <span class="bg-gray-700 px-4 rounded-xl border border-gray-500 text-xs flex items-center justify-center font-bold text-yellow-500">CODE</span>
+            </div>
 
             <div class="flex gap-2">
-
                 <input type="text" id="reg-captcha-input" placeholder="Code" class="flex-1 bg-black/40 p-3 rounded-xl border border-gray-500 outline-none text-center">
-
                 <div onclick="generateCaptcha()" id="captcha-display" class="captcha-box px-4 py-3 rounded-xl text-yellow-500 font-black cursor-pointer"></div>
-
             </div>
-
             <button onclick="handleRegister()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl shadow-lg">Register Now</button>
-
         </div>
 
         <div id="login-form" class="hidden space-y-4">
-
             <div class="flex">
-
                 <span class="bg-gray-700 p-3 rounded-l-xl border border-gray-500">+251</span>
-
                 <input type="number" id="login-phone" placeholder="9..." class="flex-1 bg-black/40 p-3 rounded-r-xl border border-gray-500 outline-none text-white">
-
             </div>
-
             <input type="password" id="login-pass" placeholder="Password" class="w-full bg-black/40 p-3 rounded-xl border border-gray-500 outline-none">
-
             <button onclick="handleLogin()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg">Login</button>
-
         </div>
-
     </section>
+
     <main id="main-app" class="hidden max-w-md mx-auto relative">
-
         <div class="absolute right-4 top-4 z-10">
-
             <select id="langSwitcher" onchange="changeLanguage(this.value)" class="bg-blue-900 text-white text-xs p-1 rounded border border-yellow-500 outline-none">
-
                 <option value="en">English</option>
-
                 <option value="am">አማርኛ</option>
-
                 <option value="or">Afaan Oromoo</option>
-
                 <option value="tg">ትግርኛ</option>
-
             </select>
-
         </div>
 
         <div class="p-8 text-center glass m-4 rounded-3xl mt-8">
-
             <p class="text-gray-400 text-sm uppercase" id="lbl-balance">Total Balance</p>
-
             <h2 class="text-5xl font-black text-yellow-500 mt-2"><span id="user-balance">0.00</span> <small class="text-sm text-white">ETB</small></h2>
-
             <p class="text-xs mt-3 bg-white/10 w-max mx-auto px-4 py-1 rounded-full">VIP Level: <span id="user-vip" class="text-green-400 font-bold">0</span></p>
-
         </div>
 
         <div id="home-tab" class="tab-content active-tab px-4 space-y-6">
-
             <div class="grid grid-cols-4 gap-3 py-4">
-
                 <div onclick="showModal('deposit')" class="glass p-3 rounded-2xl text-center cursor-pointer"><i class="fas fa-plus-circle text-green-400 mb-1"></i><p class="text-[9px]" id="nav-deposit">Deposit</p></div>
-
                 <div onclick="showModal('withdraw')" class="glass p-3 rounded-2xl text-center cursor-pointer"><i class="fas fa-minus-circle text-red-400 mb-1"></i><p class="text-[9px]" id="nav-withdraw">Withdraw</p></div>
-
                 <div onclick="window.open('https://t.me/+lcaEds42Oi1lNjU0')" class="glass p-3 rounded-2xl text-center cursor-pointer"><i class="fab fa-telegram text-blue-400 mb-1"></i><p class="text-[9px]" id="nav-group">Group</p></div>
-
                 <div onclick="window.open('https://t.me/HRPservice')" class="glass p-3 rounded-2xl text-center cursor-pointer"><i class="fas fa-headset text-blue-400 mb-1"></i><p class="text-[9px]" id="nav-service">Service</p></div>
-
             </div>
 
             <div class="glass p-4 rounded-3xl">
-
                 <h3 class="text-center font-bold text-yellow-500 mb-3 text-sm uppercase" id="lbl-inv-table">Investment Table</h3>
-
                 <table class="w-full text-xs text-center">
-
                     <thead class="bg-yellow-500 text-black">
-
                         <tr><th class="p-2">VIP</th><th class="p-2" id="th-price">Price</th><th class="p-2" id="th-daily">Daily</th></tr>
-
                     </thead>
-
                     <tbody id="inv-table-body"></tbody>
-
                 </table>
-
             </div>
-
         </div>
 
         <div id="rent-tab" class="tab-content px-4 space-y-4">
-
             <h3 class="font-bold border-l-4 border-yellow-500 pl-2 mt-4 uppercase" id="lbl-houses">Available Houses</h3>
-
             <div id="rent-grid" class="space-y-4"></div>
-
         </div>
 
         <div id="wealth-tab" class="tab-content px-4 space-y-4">
-
             <div class="glass p-6 rounded-3xl mt-6 text-center">
-
                 <button onclick="collectDaily()" class="w-24 h-24 rounded-full border-4 border-yellow-500 text-yellow-500 font-bold mb-4" id="btn-collect">COLLECT</button>
-
                 <h3 class="text-yellow-500 font-bold mb-2 uppercase" id="lbl-salary">Salary Claim Status</h3>
-
                 <div id="salary-list" class="text-[11px] space-y-3"></div>
-
             </div>
-
         </div>
 
         <div id="team-tab" class="tab-content px-4 space-y-4 mt-6">
-
             <div class="glass p-4 rounded-2xl grid grid-cols-2 gap-2 text-[10px] text-center">
-
                 <div class="border border-white/10 p-2 rounded-xl">
-
                     <p class="text-yellow-500 font-bold" id="lbl-comm-inv">Invite Commission</p>
-
                     <p>Lvl A: 25% | B: 2% | C: 1%</p>
-
                 </div>
-
                 <div class="border border-white/10 p-2 rounded-xl">
-
                     <p class="text-green-500 font-bold" id="lbl-comm-daily">Daily Income Comm.</p>
-
                     <p>Lvl A: 4% | B: 2% | C: 1%</p>
-
                 </div>
-
             </div>
 
             <div class="glass p-6 rounded-3xl flex flex-col items-center">
-
                 <div id="qrcode" class="bg-white p-2 rounded-lg mb-4"></div>
-
                 <div class="bg-black/40 p-3 rounded-xl w-full text-center">
-
                     <p class="text-[9px] text-gray-400 mb-1">Invitation Link:</p>
-
                     <span id="invite-link-full" class="text-[10px] font-bold text-yellow-500 block mb-2 break-all"></span>
-
                     <button onclick="copyInviteLink()" class="bg-yellow-500 text-black px-6 py-1 rounded text-xs font-bold uppercase">Copy Link</button>
-
                 </div>
-
             </div>
 
             <div class="glass p-4 rounded-3xl overflow-x-auto">
-
                 <h3 class="text-xs font-bold text-yellow-500 mb-2 uppercase" id="lbl-team-list">Team Members</h3>
-
                 <table class="w-full text-[10px] text-center">
-
                     <thead><tr class="border-b border-white/20"><th>ID</th><th>Level</th><th>Date</th></tr></thead>
-
                     <tbody id="team-members-body"></tbody>
-
                 </table>
-
             </div>
-
         </div>
 
         <div id="record-tab" class="tab-content px-4 mt-6">
-
             <h3 class="text-yellow-500 font-bold mb-4 uppercase" id="lbl-records">Records</h3>
-
             <div id="record-list" class="space-y-2"></div>
-
         </div>
 
         <div id="profile-tab" class="tab-content px-4 space-y-4 mt-6">
-
             <div class="glass p-6 rounded-3xl text-center">
-
                 <div class="w-20 h-20 bg-yellow-500 rounded-full mx-auto flex items-center justify-center mb-4"><i class="fas fa-user text-4xl text-black"></i></div>
-
                 <p class="text-xs text-gray-400 uppercase" id="lbl-prof-phone">Phone Number</p>
-
                 <p id="prof-phone" class="font-bold text-lg text-white mb-2"></p>
-
                 <p class="text-xs text-gray-400 uppercase" id="lbl-prof-id">Invitation Code</p>
-
                 <p id="prof-id" class="font-bold text-lg text-yellow-500"></p>
-
             </div>
-
             <div class="glass p-6 rounded-3xl space-y-3">
-
                 <p class="text-xs font-bold text-gray-400 uppercase">Bank Information</p>
-
                 <input type="text" id="bank-name-full" placeholder="Full Name" class="w-full bg-black/20 p-3 rounded-xl text-xs border border-white/10 outline-none">
-
                 <select id="bank-select" class="w-full bg-black/20 p-3 rounded-xl text-xs border border-white/10 outline-none">
-
                     <option value="CBE">CBE</option><option value="Telebirr">Telebirr</option><option value="Abyssinia">Abyssinia</option>
-
                 </select>
-
                 <input type="text" id="bank-acc" placeholder="Account Number" class="w-full bg-black/20 p-3 rounded-xl text-xs border border-white/10 outline-none">
-
                 <input type="password" id="save-pin" placeholder="Withdrawal PIN" class="w-full bg-black/20 p-3 rounded-xl text-xs border border-white/10 outline-none">
-
                 <button onclick="saveBank()" class="w-full bg-blue-600 py-3 rounded-xl text-xs font-bold uppercase">Save Info</button>
-
             </div>
-
             <button onclick="location.reload()" class="w-full bg-red-600/20 text-red-500 py-4 rounded-2xl text-sm font-bold border border-red-500/20">LOGOUT</button>
-
         </div>
 
         <nav class="fixed bottom-0 left-0 right-0 glass flex justify-around py-4 z-50 rounded-t-3xl max-w-md mx-auto">
-
             <button onclick="switchTab('home')" class="nav-btn nav-active text-center"><i class="fas fa-home"></i><p class="text-[9px]">Home</p></button>
-
             <button onclick="switchTab('rent')" class="nav-btn text-center"><i class="fas fa-building"></i><p class="text-[9px]">Rent</p></button>
-
             <button onclick="switchTab('wealth')" class="nav-btn text-center"><i class="fas fa-coins"></i><p class="text-[9px]">Wealth</p></button>
-
             <button onclick="switchTab('team')" class="nav-btn text-center"><i class="fas fa-users"></i><p class="text-[9px]">Team</p></button>
-
             <button onclick="switchTab('record')" class="nav-btn text-center"><i class="fas fa-list"></i><p class="text-[9px]">Record</p></button>
-
             <button onclick="switchTab('profile')" class="nav-btn text-center"><i class="fas fa-user"></i><p class="text-[9px]">Profile</p></button>
-
         </nav>
-
     </main>
+
     <div id="withdraw-modal" class="fixed inset-0 bg-black/95 hidden z-[100] p-6">
-
         <div class="flex justify-between items-center mb-6"><h2>WITHDRAW</h2><button onclick="closeModal('withdraw')" class="text-3xl">&times;</button></div>
-
         <p class="text-[10px] text-yellow-500 mb-4">Min: 200 ETB | Daily: 1 time | Sunday: Closed</p>
-
         <input type="number" id="wd-amt" placeholder="Amount" class="w-full p-4 rounded-xl text-black mb-4 outline-none">
-
         <input type="password" id="wd-pin-input" placeholder="Enter PIN" class="w-full p-4 rounded-xl text-black mb-4 outline-none">
-
         <button onclick="processWithdraw()" class="w-full bg-yellow-500 text-black py-4 rounded-xl font-bold uppercase">Submit Withdrawal</button>
-
     </div>
 
     <div id="deposit-modal" class="fixed inset-0 bg-black/95 hidden z-[100] p-6">
-
         <div class="flex justify-between items-center mb-6"><h2>DEPOSIT</h2><button onclick="closeModal('deposit')" class="text-3xl">&times;</button></div>
-
         <div class="glass p-4 rounded-xl mb-4 text-sm">
-
             <p class="text-gray-400">Account Name: <span class="text-white font-bold">Yesewzer Dagnaw Alemu</span></p>
-
             <p class="text-gray-400 mt-2">CBE Account: <span id="dep-acc-num" class="text-yellow-500 font-bold">1000418939498</span></p>
-
             <button onclick="copyAccount()" class="mt-2 text-[10px] bg-white/20 px-3 py-1 rounded">Copy Account</button>
-
         </div>
-
         <input type="number" id="dep-amt" placeholder="Amount" class="w-full p-4 rounded-xl text-black mb-4 outline-none">
-
         <input type="text" id="dep-ft" placeholder="FT Reference Number" class="w-full p-4 rounded-xl text-black mb-4 outline-none">
-
         <button onclick="submitDeposit()" class="w-full bg-green-600 py-4 rounded-xl font-bold uppercase">Submit Deposit</button>
-
     </div>
+
     <script type="module">
-
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-
         import { getDatabase, ref, set, get, update, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        
         const firebaseConfig = {
-
             apiKey: "AIzaSyDE_60krnzvt-40JavcDEABzf0JqbeBZZY",
-
             authDomain: "house-rent-project-f16dd.firebaseapp.com",
-
             databaseURL: "https://house-rent-project-f16dd-default-rtdb.firebaseio.com",
-
             projectId: "house-rent-project-f16dd",
-
             storageBucket: "house-rent-project-f16dd.firebasestorage.app",
-
             messagingSenderId: "76197922139",
-
             appId: "1:76197922139:web:d4eea517c1c04b2496467e"
-
         };
+
         const app = initializeApp(firebaseConfig);
-
         const db = getDatabase(app);
-
         let currentUser = null;
-
         let userData = {};
-
         let currentCaptcha = "";
+
         const salaryRules = [
-
             { id: 1, members: 10, amount: 4000 },
-
             { id: 2, members: 20, amount: 10000 },
-
             { id: 3, members: 40, amount: 20000 },
-
             { id: 4, members: 80, amount: 40000 },
-
             { id: 5, members: 160, amount: 80000 }
-
         ];
+
         const translations = {
-
             en: { balance: "Total Balance", deposit: "Deposit", withdraw: "Withdraw", group: "Group", service: "Service", invTable: "Investment Table", price: "Price", daily: "Daily Income", houses: "Available Houses", collect: "COLLECT", salary: "Salary Status", commInv: "Invite Commission", commDaily: "Daily Income Comm", teamList: "Team Members", records: "Transaction Records", profPhone: "Phone Number", profId: "Invitation Code" },
-
             am: { balance: "ጠቅላላ ቀሪ ሂሳብ", deposit: "ገቢ ያድርጉ", withdraw: "ወጪ ያድርጉ", group: "ግሩፕ", service: "እርዳታ", invTable: "የኢንቨስትመንት ሰንጠረዥ", price: "ዋጋ", daily: "የቀን ገቢ", houses: "የሚከራዩ ቤቶች", collect: "ሰብስብ", salary: "የደመወዝ ሁኔታ", commInv: "የግብዣ ኮሚሽን", commDaily: "የቀን ገቢ ኮሚሽን", teamList: "የቡድን አባላት", records: "የገንዘብ ዝውውሮች", profPhone: "ስልክ ቁጥር", profId: "የግብዣ ኮድ" },
-
             or: { balance: "Waliigala Herregaa", deposit: "Galii", withdraw: "Baasii", group: "Garee", service: "Tajaajila", invTable: "Gabatee Invistimentii", price: "Gatii", daily: "Galii Guyyaa", houses: "Manneen Kiraayii", collect: "FUNAANI", salary: "Haala Kaffaltii", commInv: "Komishinii Affeerraa", commDaily: "Komishinii Guyyaa", teamList: "Miseensota Garee", records: "Gabaasa Galii", profPhone: "Lakk. Bilbilaa", profId: "Koodii Affeerraa" },
-
             tg: { balance: "ጠቅላላ ቀሪ ሕሳብ", deposit: "ገንዘብ አእትው", withdraw: "ወጻኢ ግበር", group: "ጉጅለ", service: "ሓገዝ", invTable: "ሰሌዳ ኢንቨስትመንት", price: "ዋጋ", daily: "ናይ መዓልቲ እቶት", houses: "ዝክረዩ ኣባይቲ", collect: "አክብብ", salary: "ኩነታት ደሞዝ", commInv: "ኮሚሽን ዕድመ", commDaily: "ኮሚሽን መዓልታዊ እቶት", teamList: "ኣባላት ጉጅለ", records: "ጸብጻብ ምንቅስቓስ", profPhone: "ቁጽሪ ቴሌፎን", profId: "ኮድ ዕድመ" }
-
         };
+
         const rentLevels = [
-
             {id: 1, price: 1500, daily: 105, img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=200"},
-
             {id: 2, price: 3000, daily: 210, img: "https://images.unsplash.com/photo-1580587767373-197e37604439?w=200"},
-
             {id: 3, price: 5000, daily: 350, img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200"},
-
             {id: 4, price: 10000, daily: 700, img: "https://images.unsplash.com/photo-1600607687940-47a04b629b67?w=200"},
-
             {id: 5, price: 20000, daily: 1400, img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=200"}
-
         ];
+
+        // ገጹ ሲከፈት የጋባዥ ቁጥርን በራሱ እንዲሞላ
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('rf');
+            const inviteInput = document.getElementById('reg-invite');
+            
+            if (inviteInput) {
+                if (refCode) {
+                    inviteInput.value = refCode.toUpperCase();
+                } else {
+                    inviteInput.value = "HRP";
+                }
+            }
+            generateCaptcha();
+        });
+
         window.toggleAuth = (m) => {
-
             document.getElementById('reg-form').classList.toggle('hidden', m === 'login');
-
             document.getElementById('login-form').classList.toggle('hidden', m === 'reg');
-
             document.getElementById('reg-btn').className = m === 'reg' ? 'text-xl font-bold border-b-4 border-yellow-500' : 'text-xl font-bold opacity-50';
-
             document.getElementById('login-btn').className = m === 'login' ? 'text-xl font-bold border-b-4 border-yellow-500' : 'text-xl font-bold opacity-50';
-
         };
+
         window.generateCaptcha = () => {
-
             currentCaptcha = Math.random().toString(36).substring(2, 6).toUpperCase();
-
             document.getElementById('captcha-display').innerText = currentCaptcha;
-
         };
+
         window.handleRegister = async () => {
-
             const phone = "+251" + document.getElementById('reg-phone').value;
-
             const pass = document.getElementById('reg-pass').value;
-
             const pin = document.getElementById('reg-pin').value;
-
-            const invite = document.getElementById('reg-invite').value;
-
+            const invite = document.getElementById('reg-invite').value.trim().toUpperCase();
             const cap = document.getElementById('reg-captcha-input').value.toUpperCase();
 
             if(cap !== currentCaptcha) return alert("Wrong Captcha");
+            if(!invite.startsWith("HRP")) return alert("Invalid Invitation Code!");
 
             const myCode = "HRP" + Math.floor(100000 + Math.random() * 900000);
-
             await set(ref(db, `users/${phone}`), { phone, password: pass, pin, inviteBy: invite, myInvite: myCode, balance: 100, vip: 0, joinDate: new Date().toLocaleDateString(), claimedLevels: [] });
-
             alert("Registered! You received 100 ETB bonus."); location.reload();
-
         };
+
         window.handleLogin = async () => {
-
             const phone = "+251" + document.getElementById('login-phone').value;
-
             const pass = document.getElementById('login-pass').value;
-
             const snap = await get(ref(db, `users/${phone}`));
-
             if(snap.exists() && snap.val().password === pass) {
-
                 currentUser = phone;
-
                 document.getElementById('auth-section').classList.add('hidden');
-
                 document.getElementById('main-app').classList.remove('hidden');
-
                 onValue(ref(db, `users/${currentUser}`), s => { userData = s.val(); updateUI(); });
-
                 loadRecords(); loadTeam(); renderRent();
-
             } else alert("Invalid Login");
-
         };
+
         function updateUI() {
-
             document.getElementById('user-balance').innerText = (userData.balance || 0).toFixed(2);
-
             document.getElementById('user-vip').innerText = userData.vip || 0;
-
             const refLink = window.location.origin + window.location.pathname + "?rf=" + (userData.myInvite || "");
-
             document.getElementById('invite-link-full').innerText = refLink;
-
             document.getElementById('prof-phone').innerText = userData.phone;
-
             document.getElementById('prof-id').innerText = userData.myInvite;
-
             loadSalaryUI();
-
         }
+
         async function loadSalaryUI() {
-
             const usersSnap = await get(ref(db, 'users'));
-
             let levelACount = 0;
-
             usersSnap.forEach(u => { if(u.val().inviteBy === userData.myInvite) levelACount++; });
-
             let sHtml = "";
-
             salaryRules.forEach(r => {
-
                 const isClaimed = (userData.claimedLevels || []).includes(r.id);
-
                 const canClaim = levelACount >= r.members && !isClaimed;
-
                 sHtml += `<div class="glass p-3 rounded-xl flex justify-between items-center"><div class="text-left"><p class="font-bold text-yellow-500">Salary Lvl ${r.id}</p><p class="text-[9px] opacity-60">${levelACount}/${r.members} A-Members</p><p class="text-[10px] text-green-400">${r.amount} ETB</p></div><button onclick="claimSalary(${r.id}, ${r.amount}, ${r.members}, ${levelACount})" class="px-4 py-1 rounded-lg text-[10px] font-bold ${canClaim ? 'bg-green-600' : 'bg-gray-700 opacity-50'}" ${!canClaim ? 'disabled' : ''}>${isClaimed ? 'CLAIMED' : 'CLAIM'}</button></div>`;
-
             });
-
             document.getElementById('salary-list').innerHTML = sHtml;
-
         }
+
         window.claimSalary = async (id, amount, required, actual) => {
-
             if(actual < required) return alert("Not enough A-Members!");
-
             const claimed = userData.claimedLevels || [];
-
             if(claimed.includes(id)) return alert("Already claimed!");
-
             claimed.push(id);
-
             await update(ref(db, `users/${currentUser}`), { balance: (userData.balance || 0) + amount, claimedLevels: claimed });
-
             await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Salary Claim", amount: amount, status: "Approved", date: new Date().toLocaleDateString() });
-
             alert("Salary Claimed Successfully!");
-
         };
+
+        window.showModal = (id) => document.getElementById(id + '-modal').classList.remove('hidden');
+        window.closeModal = (id) => document.getElementById(id + '-modal').classList.add('hidden');
+
         window.submitDeposit = async () => {
-
             const amt = parseFloat(document.getElementById('dep-amt').value);
-
             const ft = document.getElementById('dep-ft').value;
-
             if(!amt || !ft) return alert("Fill all fields");
-
             await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Deposit", amount: amt, ft: ft, status: "Pending", date: new Date().toLocaleDateString() });
-
             alert("Deposit submitted! Wait for approval.");
-
             closeModal('deposit');
-
         };
+
         window.processWithdraw = async () => {
-
             const amt = parseFloat(document.getElementById('wd-amt').value);
-
             const pin = document.getElementById('wd-pin-input').value;
-
             const today = new Date();
-
             if(today.getDay() === 0) return alert("Withdrawal closed on Sunday!");
-
             if(amt < 200) return alert("Minimum withdrawal is 200 ETB!");
-
             if(userData.balance < amt) return alert("Insufficient balance!");
-
             if(pin !== userData.pin) return alert("Incorrect PIN!");
-
             const lastWd = userData.lastWdDate || "";
-
             if(lastWd === today.toLocaleDateString()) return alert("Daily limit: 1 time only!");
-
             await update(ref(db, `users/${currentUser}`), { balance: userData.balance - amt, lastWdDate: today.toLocaleDateString() });
-
             await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Withdraw", amount: amt, status: "Pending", date: today.toLocaleDateString() });
-
             alert("Withdrawal submitted!");
-
             closeModal('withdraw');
-
         };
+
         window.changeLanguage = (lang) => {
-
             const t = translations[lang];
-
             const ticker = document.getElementById('ticker-text');
-
             ticker.innerText = ticker.getAttribute('data-' + lang);
-
             document.getElementById('lbl-balance').innerText = t.balance;
-
             document.getElementById('nav-deposit').innerText = t.deposit;
-
             document.getElementById('nav-withdraw').innerText = t.withdraw;
-
             document.getElementById('nav-group').innerText = t.group;
-
             document.getElementById('nav-service').innerText = t.service;
-
             document.getElementById('lbl-inv-table').innerText = t.invTable;
-
             document.getElementById('th-price').innerText = t.price;
-
             document.getElementById('th-daily').innerText = t.daily;
-
             document.getElementById('lbl-houses').innerText = t.houses;
-
             document.getElementById('btn-collect').innerText = t.collect;
-
             document.getElementById('lbl-salary').innerText = t.salary;
-
             document.getElementById('lbl-comm-inv').innerText = t.commInv;
-
             document.getElementById('lbl-comm-daily').innerText = t.commDaily;
-
             document.getElementById('lbl-team-list').innerText = t.teamList;
-
             document.getElementById('lbl-records').innerText = t.records;
-
             document.getElementById('lbl-prof-phone').innerText = t.profPhone;
-
             document.getElementById('lbl-prof-id').innerText = t.profId;
-
         };
+
         window.copyAccount = () => {
-
             const acc = document.getElementById('dep-acc-num').innerText;
-
             navigator.clipboard.writeText(acc);
-
             alert("Account Copied!");
-
         };
+
         window.copyInviteLink = () => {
-
             const link = document.getElementById('invite-link-full').innerText;
-
             navigator.clipboard.writeText(link);
-
             alert("Link Copied!");
-
         };
+
         window.collectDaily = async () => {
-
             const lvl = rentLevels.find(l => l.id === userData.vip);
-
             if(!lvl) return alert("No active rent!");
-
             if(Date.now() - (userData.lastCollect || 0) < 86400000) return alert("Already collected!");
-
             const income = lvl.daily;
-
             await update(ref(db, `users/${currentUser}`), { balance: (userData.balance || 0) + income, lastCollect: Date.now() });
-
             await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Daily Income", amount: income, status: "Approved", date: new Date().toLocaleDateString() });
-
             distributeComm(income, [0.04, 0.02, 0.01], "Team Income Comm");
-
             alert("Collected!");
-
         };
+
         async function distributeComm(amount, rates, label) {
-
             let current = userData.inviteBy;
-
             for(let rate of rates) {
-
                 if(!current) break;
-
                 const usersSnap = await get(ref(db, 'users'));
-
                 let parentPhone = null;
-
                 usersSnap.forEach(u => { if(u.val().myInvite === current) parentPhone = u.key; });
-
                 if(parentPhone) {
-
                     const comm = amount * rate;
-
                     const pSnap = await get(ref(db, `users/${parentPhone}`));
-
                     await update(ref(db, `users/${parentPhone}`), { balance: (pSnap.val().balance || 0) + comm });
-
                     await push(ref(db, `records/${parentPhone.replace(/\+/g, '')}`), { type: label, amount: comm, status: "Approved", date: new Date().toLocaleDateString() });
-
                     current = pSnap.val().inviteBy;
-
                 } else break;
-
             }
-
         }
+
         window.rentHouse = async (id) => {
-
             const lvl = rentLevels.find(l => l.id === id);
-
             if(userData.balance < lvl.price) return alert("Low balance!");
-
             await update(ref(db, `users/${currentUser}`), { balance: userData.balance - lvl.price, vip: id });
-
             distributeComm(lvl.price, [0.25, 0.02, 0.01], "Invite Commission");
-
             alert("Rent Successful!");
-
         };
+
         window.saveBank = async () => {
-
             const name = document.getElementById('bank-name-full').value;
-
             const bank = document.getElementById('bank-select').value;
-
             const acc = document.getElementById('bank-acc').value;
-
             const pin = document.getElementById('save-pin').value;
-
             if(!name || !acc || !pin) return alert("Fill all fields");
-
             await update(ref(db, `users/${currentUser}`), { fullName: name, bankName: bank, bankAcc: acc, pin: pin });
-
             alert("Saved!");
-
         };
+
         function loadRecords() {
-
             onValue(ref(db, `records/${currentUser.replace(/\+/g, '')}`), s => {
-
                 let h = "";
-
                 s.forEach(r => {
-
                     const d = r.val();
-
                     h += `<div class="glass p-3 rounded-xl flex justify-between text-[11px]"><div><p class="font-bold">${d.type}</p><p class="opacity-50">${d.date}</p></div><div class="text-right"><p class="text-yellow-500">${d.amount} ETB</p><p class="text-blue-400">${d.status}</p></div></div>`;
-
                 });
-
                 document.getElementById('record-list').innerHTML = h;
-
             });
-
         }
+
         function loadTeam() {
-
             onValue(ref(db, 'users'), s => {
-
                 let h = "";
-
                 s.forEach(u => {
-
                     const d = u.val();
-
                     if(d.inviteBy === userData.myInvite) h += `<tr class="border-b border-white/10"><td>${d.phone.substring(0,7)}***</td><td>Level A</td><td>${d.joinDate}</td></tr>`;
-
                 });
-
                 document.getElementById('team-members-body').innerHTML = h;
-
                 document.getElementById('qrcode').innerHTML = "";
-
                 new QRCode(document.getElementById("qrcode"), { text: window.location.origin + window.location.pathname + "?rf=" + (userData.myInvite || ""), width: 120, height: 120 });
-
             });
-
         }
+
         function renderRent() {
-
             let rGrid = ""; let tBody = "";
-
             rentLevels.forEach(l => {
-
                 rGrid += `<div class="glass p-4 rounded-3xl flex items-center gap-4"><img src="${l.img}" class="w-16 h-16 rounded-xl object-cover"><div class="flex-1"><h4 class="font-bold text-sm">House VIP ${l.id}</h4><p class="text-[10px] text-gray-400">Daily: ${l.daily} ETB</p><button onclick="rentHouse(${l.id})" class="mt-2 bg-yellow-500 text-black px-4 py-1 rounded-lg text-xs font-bold uppercase">Rent ${l.price} ETB</button></div></div>`;
-
                 tBody += `<tr class="border-b border-white/5"><td>${l.id}</td><td>${l.price}</td><td class="text-green-400">${l.daily}</td></tr>`;
-
             });
-
             document.getElementById('rent-grid').innerHTML = rGrid;
-
             document.getElementById('inv-table-body').innerHTML = tBody;
-
         }
+
         window.switchTab = (t) => {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active-tab'));
             document.getElementById(t + '-tab').classList.add('active-tab');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
             event.currentTarget.classList.add('nav-active');
         };
-        window.showModal = (m) => document.getElementById(m + '-modal').classList.remove('hidden');
-        window.closeModal = (m) => document.getElementById(m + '-modal').classList.add('hidden');
-        generateCaptcha();
     </script>
 </body>
 </html>
