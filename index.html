@@ -185,7 +185,7 @@
                 </div>
             </div>
 
-            <!-- Team Commission History List (ያዘዝከኝ አዲስ ማሳያ ክፍል) -->
+            <!-- Team Commission History List (የቡድን ኮሚሽን ሎግ) -->
             <div class="glass p-4 rounded-3xl">
                 <h3 class="text-xs font-bold text-green-400 mb-2 uppercase">Team Commission Logs</h3>
                 <div id="team-comm-logs" class="space-y-1 max-h-40 overflow-y-auto text-[9px]">
@@ -506,165 +506,144 @@
         window.closeModal = (id) => document.getElementById(id + '-modal').classList.add('hidden');
 
         window.copyAccount = () => {
-            const num = document.getElementById('dep-acc-num').innerText;
-            navigator.clipboard.writeText(num);
-            alert("Account Number Copied!");
+            const accNum = document.getElementById('dep-acc-num').innerText;
+            navigator.clipboard.writeText(accNum);
+            alert("Account number copied!");
         };
 
         window.copyInviteLink = () => {
             const link = document.getElementById('invite-link-full').innerText;
             navigator.clipboard.writeText(link);
-            alert("Invitation Link Copied!");
+            alert("Invitation link copied!");
         };
 
-        window.saveBank = async () => {
-            const name = document.getElementById('bank-name-full').value;
-            const bank = document.getElementById('bank-select').value;
-            const acc = document.getElementById('bank-acc').value;
-            const pin = document.getElementById('save-pin').value;
-
-            if(pin !== userData.pin) return alert("Incorrect Withdrawal PIN!");
-            await update(ref(db, `users/${currentUser}`), { bankName: name, bankType: bank, bankAccount: acc });
-            alert("Bank Information Saved Successfully!");
-        };
-
+        // --- DEPOSIT SUBMISSION WITH RECORDING ---
         window.submitDeposit = async () => {
             const amt = parseFloat(document.getElementById('dep-amt').value);
             const ft = document.getElementById('dep-ft').value.trim();
+            if(!amt || amt <= 0 || !ft) return alert("Please enter valid amount and FT reference number!");
 
-            if(!amt || !ft) return alert("Please fill all fields");
-            
-            const depRef = push(ref(db, 'deposits'));
-            await set(depRef, { id: depRef.key, phone: currentUser, amount: amt, ftReference: ft, status: "Pending", date: new Date().toLocaleDateString() });
-            
-            alert("Deposit Submitted! Waiting for approval.");
+            const cleanPhone = currentUser.replace(/\+/g, '');
+            const newDepRef = push(ref(db, `deposits`)); // Admin App እንዲያየው ማዕከላዊ ቦታ
+            const depData = {
+                id: newDepRef.key,
+                phone: currentUser,
+                amount: amt,
+                ft: ft,
+                status: "Pending",
+                date: new Date().toLocaleDateString()
+            };
+
+            await set(newDepRef, depData);
+            // ለተጠቃሚው ሪከርድ ገጽ ላይ እንዲቀመጥ
+            await push(ref(db, `records/${cleanPhone}`), {
+                type: "Deposit Request",
+                amount: amt,
+                ft: ft,
+                status: "Pending",
+                date: depData.date
+            });
+
+            alert("Deposit request submitted successfully! Pending admin approval.");
             closeModal('deposit');
+            document.getElementById('dep-amt').value = '';
+            document.getElementById('dep-ft').value = '';
         };
 
+        // --- WITHDRAW PROCESS WITH RECORDING & PIN CHECK ---
         window.processWithdraw = async () => {
             const amt = parseFloat(document.getElementById('wd-amt').value);
             const pin = document.getElementById('wd-pin-input').value;
-
-            if(!amt || amt < 200) return alert("Minimum withdrawal is 200 ETB");
-            if(pin !== userData.pin) return alert("Incorrect PIN");
-            if((userData.balance || 0) < amt) return alert("Insufficient Balance");
-
-            await update(ref(db, `users/${currentUser}`), { balance: (userData.balance || 0) - amt });
             
-            const wdRef = push(ref(db, 'withdrawals'));
-            await set(wdRef, { id: wdRef.key, phone: currentUser, amount: amt, status: "Pending", date: new Date().toLocaleDateString() });
-            
-            alert("Withdrawal Request Submitted!");
-            closeModal('withdraw');
-        };
+            if(!amt || amt < 200) return alert("Minimum withdrawal is 200 ETB!");
+            if(pin !== userData.pin) return alert("Incorrect Withdrawal PIN!");
+            if((userData.balance || 0) < amt) return alert("Insufficient balance!");
 
-        // 1. Daily income, collected ይበል። 
-        // 2 & 3 የሁለቱም ኮሚሽኖች ወደ ጋባዥ ባላንስ መደመር፣ Record ገጽ መግባት እና በTeam ላይ ዝርዝር መመዝገብ
-        window.collectDaily = async () => {
-            if(!userData.vip || userData.vip === 0) return alert("Please rent a house first (VIP 1 or above)!");
-            const now = Date.now();
-            if(userData.lastCollect && (now - userData.lastCollect < 86400000)) return alert("You can only collect once every 24 hours!");
+            const cleanPhone = currentUser.replace(/\+/g, '');
+            // ባላንስ ቀንሰህ አስቀምጥ
+            const newBalance = userData.balance - amt;
+            await update(ref(db, `users/${currentUser}`), { balance: newBalance });
 
-            const activeHouse = rentLevels.find(r => r.id === userData.vip);
-            const dailyReward = activeHouse ? activeHouse.daily : 0;
+            const newWdRef = push(ref(db, `withdrawals`)); // ለAdmin App ማደራጃ
+            const wdData = {
+                id: newWdRef.key,
+                phone: currentUser,
+                amount: amt,
+                status: "Pending",
+                date: new Date().toLocaleDateString()
+            };
 
-            await update(ref(db, `users/${currentUser}`), { balance: (userData.balance || 0) + dailyReward, lastCollect: now });
-            
-            // ሪከርድ ባር ላይ መቀመጥ ያለበት (1, Daily income, collected ይበል)
-            await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Daily income", amount: dailyReward, status: "collected", date: new Date().toLocaleDateString() });
-
-            // ጋባዦችን በሰንሰለት (A, B, C) መፈለግና ኮሚሽን ማከፋፈል (VIP ለሆኑት ብቻ)
-            let currentInviteBy = userData.inviteBy;
-            
-            // Level A
-            if(currentInviteBy && currentInviteBy !== "HRP") {
-                const upASnap = await get(ref(db, 'users'));
-                let phoneA = null; let dataA = null;
-                upASnap.forEach(u => { if(u.val().myInvite === currentInviteBy) { phoneA = u.key; dataA = u.val(); } });
-                
-                if(phoneA && dataA && (dataA.vip || 0) > 0) { // VIP ለሆኑት ብቻ መሰላት አለበት
-                    let comm = dailyReward * 0.04;
-                    await update(ref(db, `users/${phoneA}`), { balance: (dataA.balance || 0) + comm });
-                    await push(ref(db, `records/${phoneA.replace(/\+/g, '')}`), { type: "Daily Income Comm.", amount: comm, status: "Approved", date: new Date().toLocaleDateString() });
-                    await push(ref(db, `team_commissions/${phoneA.replace(/\+/g, '')}`), { type: "Daily Income Comm (Lvl A)", from: userData.phone, amount: comm, date: new Date().toLocaleDateString() });
-                    
-                    // Level B
-                    if(dataA.inviteBy && dataA.inviteBy !== "HRP") {
-                        let phoneB = null; let dataB = null;
-                        upASnap.forEach(u => { if(u.val().myInvite === dataA.inviteBy) { phoneB = u.key; dataB = u.val(); } });
-                        if(phoneB && dataB && (dataB.vip || 0) > 0) {
-                            let commB = dailyReward * 0.02;
-                            await update(ref(db, `users/${phoneB}`), { balance: (dataB.balance || 0) + commB });
-                            await push(ref(db, `records/${phoneB.replace(/\+/g, '')}`), { type: "Daily Income Comm.", amount: commB, status: "Approved", date: new Date().toLocaleDateString() });
-                            await push(ref(db, `team_commissions/${phoneB.replace(/\+/g, '')}`), { type: "Daily Income Comm (Lvl B)", from: userData.phone, amount: commB, date: new Date().toLocaleDateString() });
-                            
-                            // Level C
-                            if(dataB.inviteBy && dataB.inviteBy !== "HRP") {
-                                let phoneC = null; let dataC = null;
-                                upASnap.forEach(u => { if(u.val().myInvite === dataB.inviteBy) { phoneC = u.key; dataC = u.val(); } });
-                                if(phoneC && dataC && (dataC.vip || 0) > 0) {
-                                    let commC = dailyReward * 0.01;
-                                    await update(ref(db, `users/${phoneC}`), { balance: (dataC.balance || 0) + commC });
-                                    await push(ref(db, `records/${phoneC.replace(/\+/g, '')}`), { type: "Daily Income Comm.", amount: commC, status: "Approved", date: new Date().toLocaleDateString() });
-                                    await push(ref(db, `team_commissions/${phoneC.replace(/\+/g, '')}`), { type: "Daily Income Comm (Lvl C)", from: userData.phone, amount: commC, date: new Date().toLocaleDateString() });
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            alert("Daily income collected successfully!");
-        };
-
-        window.renderRent = () => {
-            let html = "";
-            rentLevels.forEach(r => {
-                html += `<div class="glass p-4 rounded-3xl flex items-center justify-between"><img src="${r.img}" class="w-16 h-16 rounded-xl object-cover"><div class="flex-1 ml-4 text-left"><p class="font-black text-yellow-500">VIP ${r.id} House</p><p class="text-[11px] opacity-70">Price: ${r.price} ETB</p><p class="text-[11px] text-green-400">Daily Income: ${r.daily} ETB</p></div><button onclick="buyRent(${r.id}, ${r.price})" class="bg-yellow-500 text-black font-bold text-xs px-4 py-2 rounded-xl">RENT</button></div>`;
+            await set(newWdRef, wdData);
+            // ወደ ተጠቃሚው ሪከርድ መዝግብ
+            await push(ref(db, `records/${cleanPhone}`), {
+                type: "Withdraw Request",
+                amount: amt,
+                status: "Pending",
+                date: wdData.date
             });
-            document.getElementById('rent-grid').innerHTML = html;
+
+            alert("Withdrawal request submitted! Amount deducted from your balance.");
+            closeModal('withdraw');
+            document.getElementById('wd-amt').value = '';
+            document.getElementById('wd-pin-input').value = '';
         };
 
+        // --- RENT BUY & MULTI-LEVEL INVITE COMMISSION (15%, 2%, 1%) ---
         window.buyRent = async (id, price) => {
-            if((userData.balance || 0) < price) return alert("Insufficient balance! Please deposit.");
-            if((userData.vip || 0) >= id) return alert("You already have this house or a higher one!");
+            if((userData.balance || 0) < price) return alert("Insufficient Balance to Rent this House!");
+            
+            const newVip = Math.max(userData.vip || 0, id);
+            const newBal = userData.balance - price;
+            
+            await update(ref(db, `users/${currentUser}`), { balance: newBal, vip: newVip });
+            
+            const cleanPhone = currentUser.replace(/\+/g, '');
+            await push(ref(db, `records/${cleanPhone}`), {
+                type: `Rented House VIP ${id}`,
+                amount: price,
+                status: "collected",
+                date: new Date().toLocaleDateString()
+            });
 
-            await update(ref(db, `users/${currentUser}`), { balance: (userData.balance || 0) - price, vip: id });
-            await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: `Rent VIP ${id}`, amount: price, status: "Approved", date: new Date().toLocaleDateString() });
+            // የግብዣ ኮሚሽን ክፍፍል ህግ (15% , 2% , 1%) የሚሰራው ቤት ሲከራዩ ብቻ ነው
+            if (userData.inviteBy && userData.inviteBy !== "HRP") {
+                const snapUsers = await get(ref(db, 'users'));
+                let levelAUser = null;
+                let levelBUser = null;
+                let levelCUser = null;
 
-            // Invite Commission (ቤት ሲከራይ / VIP ሲሆን ብቻ ለጋባዡ የሚሰላው ህግ A, B, C)
-            let currentInviteBy = userData.inviteBy;
-            if(currentInviteBy && currentInviteBy !== "HRP") {
-                const allUsersSnap = await get(ref(db, 'users'));
-                
-                // Level A ጋባዥ
-                let phoneA = null; let dataA = null;
-                allUsersSnap.forEach(u => { if(u.val().myInvite === currentInviteBy) { phoneA = u.key; dataA = u.val(); } });
-                
-                if(phoneA && dataA && (dataA.vip || 0) > 0) { // ለተከራዩ / VIP ለሆኑት ብቻ ይሰላል
-                    let invCommA = price * 0.15;
-                    await update(ref(db, `users/${phoneA}`), { balance: (dataA.balance || 0) + invCommA });
-                    await push(ref(db, `records/${phoneA.replace(/\+/g, '')}`), { type: "Invite Commission", amount: invCommA, status: "Approved", date: new Date().toLocaleDateString() });
-                    await push(ref(db, `team_commissions/${phoneA.replace(/\+/g, '')}`), { type: "Invite Commission (Lvl A)", from: userData.phone, amount: invCommA, date: new Date().toLocaleDateString() });
-                    
-                    // Level B ጋባዥ
-                    if(dataA.inviteBy && dataA.inviteBy !== "HRP") {
-                        let phoneB = null; let dataB = null;
-                        allUsersSnap.forEach(u => { if(u.val().myInvite === dataA.inviteBy) { phoneB = u.key; dataB = u.val(); } });
-                        if(phoneB && dataB && (dataB.vip || 0) > 0) {
-                            let invCommB = price * 0.02;
-                            await update(ref(db, `users/${phoneB}`), { balance: (dataB.balance || 0) + invCommB });
-                            await push(ref(db, `records/${phoneB.replace(/\+/g, '')}`), { type: "Invite Commission", amount: invCommB, status: "Approved", date: new Date().toLocaleDateString() });
-                            await push(ref(db, `team_commissions/${phoneB.replace(/\+/g, '')}`), { type: "Invite Commission (Lvl B)", from: userData.phone, amount: invCommB, date: new Date().toLocaleDateString() });
-                            
-                            // Level C ጋባዥ
-                            if(dataB.inviteBy && dataB.inviteBy !== "HRP") {
-                                let phoneC = null; let dataC = null;
-                                allUsersSnap.forEach(u => { if(u.val().myInvite === dataB.inviteBy) { phoneC = u.key; dataC = u.val(); } });
-                                if(phoneC && dataC && (dataC.vip || 0) > 0) {
-                                    let invCommC = price * 0.01;
-                                    await update(ref(db, `users/${phoneC}`), { balance: (dataC.balance || 0) + invCommC });
-                                    await push(ref(db, `records/${phoneC.replace(/\+/g, '')}`), { type: "Invite Commission", amount: invCommC, status: "Approved", date: new Date().toLocaleDateString() });
-                                    await push(ref(db, `team_commissions/${phoneC.replace(/\+/g, '')}`), { type: "Invite Commission (Lvl C)", from: userData.phone, amount: invCommC, date: new Date().toLocaleDateString() });
+                snapUsers.forEach(u => {
+                    const val = u.val();
+                    if(val.myInvite === userData.inviteBy) levelAUser = val;
+                });
+
+                // Level A (15% ኮሚሽን)
+                if (levelAUser) {
+                    const commA = price * 0.15;
+                    const cleanAPhone = levelAUser.phone.replace(/\+/g, '');
+                    await update(ref(db, `users/${levelAUser.phone}`), { balance: (levelAUser.balance || 0) + commA });
+                    await push(ref(db, `records/${cleanAPhone}`), { type: "Invite Commission Lvl A", amount: commA, status: "Approved", date: new Date().toLocaleDateString() });
+                    await push(ref(db, `team_comm_logs/${cleanAPhone}`), { from: userData.myInvite, level: "A (15%)", amount: commA, date: new Date().toLocaleDateString() });
+
+                    // Level B (2% ኮሚሽን)
+                    if (levelAUser.inviteBy && levelAUser.inviteBy !== "HRP") {
+                        snapUsers.forEach(u => { if(u.val().myInvite === levelAUser.inviteBy) levelBUser = u.val(); });
+                        if (levelBUser) {
+                            const commB = price * 0.02;
+                            const cleanBPhone = levelBUser.phone.replace(/\+/g, '');
+                            await update(ref(db, `users/${levelBUser.phone}`), { balance: (levelBUser.balance || 0) + commB });
+                            await push(ref(db, `records/${cleanBPhone}`), { type: "Invite Commission Lvl B", amount: commB, status: "Approved", date: new Date().toLocaleDateString() });
+                            await push(ref(db, `team_comm_logs/${cleanBPhone}`), { from: userData.myInvite, level: "B (2%)", amount: commB, date: new Date().toLocaleDateString() });
+
+                            // Level C (1% ኮሚሽን)
+                            if (levelBUser.inviteBy && levelBUser.inviteBy !== "HRP") {
+                                snapUsers.forEach(u => { if(u.val().myInvite === levelBUser.inviteBy) levelCUser = u.val(); });
+                                if (levelCUser) {
+                                    const commC = price * 0.01;
+                                    const cleanCPhone = levelCUser.phone.replace(/\+/g, '');
+                                    await update(ref(db, `users/${levelCUser.phone}`), { balance: (levelCUser.balance || 0) + commC });
+                                    await push(ref(db, `records/${cleanCPhone}`), { type: "Invite Commission Lvl C", amount: commC, status: "Approved", date: new Date().toLocaleDateString() });
+                                    await push(ref(db, `team_comm_logs/${cleanCPhone}`), { from: userData.myInvite, level: "C (1%)", amount: commC, date: new Date().toLocaleDateString() });
                                 }
                             }
                         }
@@ -672,132 +651,210 @@
                 }
             }
 
-            alert(`Successfully rented VIP ${id} house!`);
+            alert(`House Rented successfully! You are now VIP ${newVip}`);
+        };
+
+        // --- DAILY COLLECT INCOME WITH MULTI-LEVEL TEAM COMMISSION (4%, 2%, 1%) ---
+        window.collectDaily = async () => {
+            if((userData.vip || 0) === 0) return alert("You must rent a house (VIP 1+) first to collect daily income!");
+            
+            const now = Date.now();
+            if(userData.lastCollect && (now - userData.lastCollect < 86400000)) {
+                return alert("You can only collect once every 24 hours!");
+            }
+
+            let activeHouse = rentLevels.find(r => r.id === userData.vip);
+            if(!activeHouse) return alert("Invalid House Level Data!");
+
+            const earned = activeHouse.daily;
+            const newBal = (userData.balance || 0) + earned;
+
+            await update(ref(db, `users/${currentUser}`), { balance: newBal, lastCollect: now });
+            
+            const cleanPhone = currentUser.replace(/\+/g, '');
+            await push(ref(db, `records/${cleanPhone}`), {
+                type: `Daily Income Collect VIP ${userData.vip}`,
+                amount: earned,
+                status: "collected",
+                date: new Date().toLocaleDateString()
+            });
+
+            // ዕለታዊ ገቢ ኮሚሽን ስርጭት ህግ (4% , 2% , 1%)
+            if (userData.inviteBy && userData.inviteBy !== "HRP") {
+                const snapUsers = await get(ref(db, 'users'));
+                let lvlA = null, lvlB = null, lvlC = null;
+
+                snapUsers.forEach(u => { if(u.val().myInvite === userData.inviteBy) lvlA = u.val(); });
+                if(lvlA) {
+                    const cA = earned * 0.04;
+                    const clA = lvlA.phone.replace(/\+/g, '');
+                    await update(ref(db, `users/${lvlA.phone}`), { balance: (lvlA.balance || 0) + cA });
+                    await push(ref(db, `records/${clA}`), { type: "Daily Income Comm Lvl A", amount: cA, status: "Approved", date: new Date().toLocaleDateString() });
+                    await push(ref(db, `team_comm_logs/${clA}`), { from: userData.myInvite, level: "Daily Income A (4%)", amount: cA, date: new Date().toLocaleDateString() });
+
+                    if(lvlA.inviteBy && lvlA.inviteBy !== "HRP") {
+                        snapUsers.forEach(u => { if(u.val().myInvite === lvlA.inviteBy) lvlB = u.val(); });
+                        if(lvlB) {
+                            const cB = earned * 0.02;
+                            const clB = lvlB.phone.replace(/\+/g, '');
+                            await update(ref(db, `users/${lvlB.phone}`), { balance: (lvlB.balance || 0) + cB });
+                            await push(ref(db, `records/${clB}`), { type: "Daily Income Comm Lvl B", amount: cB, status: "Approved", date: new Date().toLocaleDateString() });
+                            await push(ref(db, `team_comm_logs/${clB}`), { from: userData.myInvite, level: "Daily Income B (2%)", amount: cB, date: new Date().toLocaleDateString() });
+
+                            if(lvlB.inviteBy && lvlB.inviteBy !== "HRP") {
+                                snapUsers.forEach(u => { if(u.val().myInvite === lvlB.inviteBy) lvlC = u.val(); });
+                                if(lvlC) {
+                                    const cC = earned * 0.01;
+                                    const clC = lvlC.phone.replace(/\+/g, '');
+                                    await update(ref(db, `users/${lvlC.phone}`), { balance: (lvlC.balance || 0) + cC });
+                                    await push(ref(db, `records/${clC}`), { type: "Daily Income Comm Lvl C", amount: cC, status: "Approved", date: new Date().toLocaleDateString() });
+                                    await push(ref(db, `team_comm_logs/${clC}`), { from: userData.myInvite, level: "Daily Income C (1%)", amount: cC, date: new Date().toLocaleDateString() });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            alert(`Collected ${earned.toFixed(2)} ETB successfully!`);
+        };
+
+        // --- LOAD TRANSACTION RECORDS ---
+        function loadRecords() {
+            const cleanPhone = currentUser.replace(/\+/g, '');
+            onValue(ref(db, `records/${cleanPhone}`), snap => {
+                const listEl = document.getElementById('record-list');
+                if(!listEl) return;
+                listEl.innerHTML = "";
+                
+                if(!snap.exists()) {
+                    listEl.innerHTML = `<p class="text-gray-500 text-center py-4">No transactions found.</p>`;
+                    return;
+                }
+
+                snap.forEach(child => {
+                    const d = child.val();
+                    let sColor = "text-yellow-500";
+                    if(d.status === "Approved" || d.status === "Successful" || d.status === "collected") sColor = "text-green-400";
+                    if(d.status === "Rejected") sColor = "text-red-500";
+                    if(d.status === "Pending") sColor = "text-blue-400";
+
+                    listEl.innerHTML = `<div class="glass p-3 rounded-xl flex justify-between items-center text-xs"><div><p class="font-bold text-white">${d.type}</p><p class="text-[9px] text-gray-400">${d.date} ${d.ft ? '| FT: '+d.ft : ''}</p></div><div class="text-right"><p class="font-bold text-yellow-500">${d.amount} ETB</p><p class="text-[9px] font-bold ${sColor}">${d.status.toUpperCase()}</p></div></div>` + listEl.innerHTML;
+                });
+            });
+        }
+
+        // --- LOAD TEAM MEMBERS & COMMISSION LOGS ---
+        async function loadTeam() {
+            const cleanPhone = currentUser.replace(/\+/g, '');
+            
+            // 1. የቡድን ኮሚሽን ታሪክን ማንበቢያ (Logs)
+            onValue(ref(db, `team_comm_logs/${cleanPhone}`), snap => {
+                const logBox = document.getElementById('team-comm-logs');
+                if(logBox) {
+                    logBox.innerHTML = "";
+                    if(snap.exists()) {
+                        snap.forEach(c => {
+                            const log = c.val();
+                            logBox.innerHTML = `<div class="bg-white/5 p-1 rounded border border-white/5 flex justify-between"><span>From: ${log.from} (${log.level})</span><span class="text-yellow-500 font-bold">+${log.amount.toFixed(2)} ETB</span></div>` + logBox.innerHTML;
+                        });
+                    } else {
+                        logBox.innerHTML = `<p class="text-gray-500 text-center py-2">No commissions recorded yet.</p>`;
+                    }
+                }
+            });
+
+            // 2. የቡድን አባላት ዝርዝር ማሳያ (Levels A, B, C)
+            const usersSnap = await get(ref(db, 'users'));
+            const tbody = document.getElementById('team-members-body');
+            if(!tbody) return;
+            tbody.innerHTML = "";
+
+            let allUsers = [];
+            usersSnap.forEach(u => { allUsers.push(u.val()); });
+
+            let myCode = userData.myInvite;
+            let levelA = allUsers.filter(u => u.inviteBy === myCode);
+            let levelB = [];
+            let levelC = [];
+
+            levelA.forEach(a => {
+                let subB = allUsers.filter(u => u.inviteBy === a.myInvite);
+                levelB = levelB.concat(subB.map(b => ({ ...b, parentLvl: 'B' })));
+                a.lvlName = 'A';
+            });
+
+            levelB.forEach(b => {
+                let subC = allUsers.filter(u => u.inviteBy === b.myInvite);
+                levelC = levelC.concat(subC.map(c => ({ ...c, parentLvl: 'C' })));
+                b.lvlName = 'B';
+            });
+            levelC.forEach(c => { c.lvlName = 'C'; });
+
+            let finalTeam = [...levelA, ...levelB, ...levelC];
+
+            if(finalTeam.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-gray-500 py-4">No team members joined yet.</td></tr>`;
+                return;
+            }
+
+            finalTeam.forEach(m => {
+                let statusText = (m.vip || 0) > 0 ? `<span class="text-green-400 font-bold">Active</span>` : `<span class="text-gray-500">Free</span>`;
+                tbody.innerHTML += `<tr class="border-b border-white/5"><td class="py-2 text-white font-bold">${m.myInvite}</td><td class="text-blue-400">Level ${m.lvlName}</td><td class="text-yellow-500 font-bold">VIP ${m.vip || 0}</td><td>${statusText}</td></tr>`;
+            });
+        }
+
+        // --- SAVE BANK INFORMATION WITH PIN VERIFICATION ---
+        window.saveBank = async () => {
+            const name = document.getElementById('bank-name-full').value.trim();
+            const bank = document.getElementById('bank-select').value;
+            const acc = document.getElementById('bank-acc').value.trim();
+            const pin = document.getElementById('save-pin').value;
+
+            if(!name || !acc || !pin) return alert("Please fill all fields!");
+            if(pin !== userData.pin) return alert("Incorrect Withdrawal PIN!");
+
+            await update(ref(db, `users/${currentUser}`), { bankName: name, bankType: bank, bankAccount: acc });
+            alert("Bank Information Saved Successfully!");
+            document.getElementById('save-pin').value = '';
         };
 
         function renderInvestmentTable() {
-            let html = "";
-            rentLevels.forEach(r => { html += `<tr class="border-b border-white/10"><td class="p-2 font-bold text-yellow-500">VIP ${r.id}</td><td class="p-2">${r.price} ETB</td><td class="p-2 text-green-400">${r.daily} ETB</td></tr>`; });
-            document.getElementById('inv-table-body').innerHTML = html;
+            const body = document.getElementById('inv-table-body');
+            if(!body) return;
+            body.innerHTML = "";
+            rentLevels.forEach(r => {
+                body.innerHTML += `<tr class="border-b border-white/10"><td class="p-2 font-bold text-yellow-500">VIP ${r.id}</td><td class="p-2">${r.price} ETB</td><td class="p-2 text-green-400">+${r.daily.toFixed(2)} ETB</td></tr>`;
+            });
+        }
+
+        function renderRent() {
+            const grid = document.getElementById('rent-grid');
+            if(!grid) return;
+            grid.innerHTML = "";
+            rentLevels.forEach(r => {
+                grid.innerHTML += `<div class="glass p-4 rounded-3xl flex items-center justify-between gap-4"><img src="${r.img}" class="w-16 h-16 object-cover rounded-2xl border border-white/10" alt="VIP ${r.id}"><div class="flex-1 text-left"><h4 class="font-bold text-sm text-yellow-500">House Plan - VIP ${r.id}</h4><p class="text-[10px] text-gray-400">Price: <span class="text-white font-bold">${r.price} ETB</span></p><p class="text-[10px] text-green-400">Daily: +${r.daily.toFixed(2)} ETB/Day</p></div><button onclick="buyRent(${r.id}, ${r.price})" class="bg-yellow-500 text-black font-bold px-4 py-2 rounded-xl text-xs uppercase shadow-md">Rent</button></div>`;
+            });
         }
 
         function generateLiveTransactions() {
-            const actions = ["Deposited", "Withdrawn", "Earned"];
-            const prefixes = ["091", "092", "093", "094", "090", "097", "096"];
-            let html = "";
+            const ticker = document.getElementById('live-ticker');
+            if(!ticker) return;
+            ticker.innerHTML = "";
+            const prefixes = ["0912", "0923", "0930", "0945", "0900", "0974", "0711", "0960"];
+            const types = ["Deposit Approved", "Withdrawal Successful", "VIP 1 Rented", "VIP 2 Rented", "VIP 3 Rented"];
+            
             for(let i=0; i<15; i++) {
-                let p = prefixes[Math.floor(Math.random() * prefixes.length)] + "****" + Math.floor(100 + Math.random() * 900);
-                let act = actions[Math.floor(Math.random() * actions.length)];
-                let amt = Math.floor(200 + Math.random() * 15000);
-                html += `<div class="glass p-2 rounded-xl flex justify-between items-center text-[10px]"><span><i class="fas fa-user text-gray-400 mr-1"></i> ${p}</span><span class="${act==='Withdrawn'?'text-red-400':act==='Deposited'?'text-green-400':'text-yellow-500'} font-bold">${act} ${amt} ETB</span></div>`;
+                let randPhone = prefixes[Math.floor(Math.random()*prefixes.length)] + "***" + Math.floor(100+Math.random()*900);
+                let randType = types[Math.floor(Math.random()*types.length)];
+                let randAmt = Math.floor(200 + Math.random()*25000);
+                let color = randType.includes("Withdraw") ? "text-red-400" : "text-green-400";
+                
+                ticker.innerHTML += `<div class="bg-black/20 p-2 rounded-xl text-[10px] flex justify-between border border-white/5"><span><i class="fas fa-circle text-[6px] ${color} mr-1 animate-pulse"></i> User <b class="text-white">${randPhone}</b>: ${randType}</span><span class="font-bold text-yellow-500">${randAmt} ETB</span></div>`;
             }
-            document.getElementById('live-ticker').innerHTML = html + html;
+            // ለInfinite loop ማሸብለል እንዲያመች ድጋሚ መድገም
+            ticker.innerHTML += ticker.innerHTML;
         }
-
-        function loadRecords() {
-            onValue(ref(db, `records/${currentUser.replace(/\+/g, '')}`), snap => {
-                let html = "";
-                if(snap.exists()) {
-                    snap.forEach(r => {
-                        let d = r.val();
-                        let sColor = "text-yellow-500";
-                        
-                        // 2 & 3. የሁኔታዎች ስያሜ መቀየር ህግ
-                        if(d.status === "Successful" || d.status === "collected") sColor = "text-green-400";
-                        if(d.status === "Approved") sColor = "text-blue-400";
-                        if(d.status === "Rejected") sColor = "text-red-500";
-
-                        html = `<div class="glass p-3 rounded-xl flex justify-between items-center text-xs"><div><p class="font-bold">${d.type}</p><p class="text-[9px] opacity-50">${d.date || ""}</p></div><div class="text-right"><p class="font-bold text-yellow-500">${d.amount} ETB</p><p class="${sColor} text-[10px] uppercase font-black">${d.status}</p></div></div>` + html;
-                    });
-                } else html = `<p class="text-xs opacity-50 py-4 text-center">No Records Found</p>`;
-                document.getElementById('record-list').innerHTML = html;
-            });
-        }
-
-        function loadTeam() {
-            // የተጋባዥ ዝርዝር ማሳያ
-            onValue(ref(db, 'users'), snap => {
-                let html = "";
-                if(snap.exists()) {
-                    snap.forEach(u => {
-                        let m = u.val();
-                        let lvl = "";
-                        if(m.inviteBy === userData.myInvite) lvl = "A";
-                        
-                        if(lvl !== "") {
-                            let statusText = (m.vip || 0) > 0 ? `VIP ${m.vip}` : "No VIP";
-                            let statusColor = (m.vip || 0) > 0 ? "text-green-400 font-bold" : "text-gray-400";
-                            let censoredPhone = m.phone.substring(0, 6) + "****" + m.phone.substring(m.phone.length - 3);
-                            
-                            html += `<tr class="border-b border-white/10">
-                                <td class="p-2">${censoredPhone}</td>
-                                <td class="p-2 font-bold text-yellow-500">${lvl}</td>
-                                <td class="p-2">${m.vip || 0}</td>
-                                <td class="p-2 ${statusColor}">${statusText}</td>
-                            </tr>`;
-                        }
-                    });
-                }
-                if(html === "") html = `<tr><td colspan="4" class="p-4 opacity-50 text-center">No Team Members</td></tr>`;
-                document.getElementById('team-members-body').innerHTML = html;
-            });
-
-            // በTeam ገጽ ላይ የኮሚሽኑ አይነት እና የትኛው ደንበኛ እንደገባለት መዝግቦ ማሳያ ህግ
-            onValue(ref(db, `team_commissions/${currentUser.replace(/\+/g, '')}`), snap => {
-                let logHtml = "";
-                if(snap.exists()) {
-                    snap.forEach(l => {
-                        let log = l.val();
-                        let fromCensored = log.from.substring(0, 6) + "****" + log.from.substring(log.from.length - 3);
-                        logHtml = `<div class="bg-black/20 p-2 rounded border border-white/5 flex justify-between items-center mb-1">
-                            <div>
-                                <span class="text-yellow-500 font-bold">${log.type}</span> 
-                                <span class="opacity-60">from ${fromCensored}</span>
-                            </div>
-                            <span class="text-green-400 font-bold">+${log.amount} ETB</span>
-                        </div>` + logHtml;
-                    });
-                } else {
-                    logHtml = `<p class="text-gray-500 text-center py-2">No commissions recorded yet.</p>`;
-                }
-                document.getElementById('team-comm-logs').innerHTML = logHtml;
-            });
-        }
-
-        // ለAdmin ማጽደቂያ ስክሪፕቶች ወይም በFirebase Functions ላይ የምትጠቀመው የባክኤንድ ህግጋት (Withdraw / Deposit ማጽደቂያ)
-        window.adminActionSimulator = async (type, requestId, action, userPhone, amount) => {
-            if(type === 'withdraw') {
-                if(action === 'approve') {
-                    // 2. Withdraw ሲጸድቅ Successful ይበል
-                    await update(ref(db, `withdrawals/${requestId}`), { status: "Successful" });
-                    await push(ref(db, `records/${userPhone.replace(/\+/g, '')}`), { type: "Withdrawal", amount: amount, status: "Successful", date: new Date().toLocaleDateString() });
-                } else if(action === 'reject') {
-                    // Reject ደግሞ Rejected ይበል + ወጪዎች Rejected ሲባሉ ወደ ባላንስ ይደመሩ
-                    const userSnap = await get(ref(db, `users/${userPhone}`));
-                    if(userSnap.exists()) {
-                        let currentBal = userSnap.val().balance || 0;
-                        await update(ref(db, `users/${userPhone}`), { balance: currentBal + amount });
-                    }
-                    await update(ref(db, `withdrawals/${requestId}`), { status: "Rejected" });
-                    await push(ref(db, `records/${userPhone.replace(/\+/g, '')}`), { type: "Withdrawal Refund", amount: amount, status: "Rejected", date: new Date().toLocaleDateString() });
-                }
-            } else if(type === 'deposit') {
-                if(action === 'approve') {
-                    // 3. Deposit ሲጸድቅ Approved ይበል
-                    const userSnap = await get(ref(db, `users/${userPhone}`));
-                    if(userSnap.exists()) {
-                        let currentBal = userSnap.val().balance || 0;
-                        await update(ref(db, `users/${userPhone}`), { balance: currentBal + amount });
-                    }
-                    await update(ref(db, `deposits/${requestId}`), { status: "Approved" });
-                    await push(ref(db, `records/${userPhone.replace(/\+/g, '')}`), { type: "Deposit", amount: amount, status: "Approved", date: new Date().toLocaleDateString() });
-                } else if(action === 'reject') {
-                    // Reject ደግሞ Rejected ይበል
-                    await update(ref(db, `deposits/${requestId}`), { status: "Rejected" });
-                    await push(ref(db, `records/${userPhone.replace(/\+/g, '')}`), { type: "Deposit", amount: amount, status: "Rejected", date: new Date().toLocaleDateString() });
-                }
-            }
-        };
     </script>
 </body>
 </html>
