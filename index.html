@@ -11,7 +11,6 @@
         @keyframes move-text { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
         .moving-text { white-space: nowrap; animation: move-text 15s linear infinite; }
         
-        /* ማሻሻያ፦ ተንቀሳቃሽ የሕንጻ ምስል በ Background ላይ ማድረግ */
         body { 
             position: relative;
             background: #0f172a; 
@@ -26,7 +25,7 @@
             left: 0;
             width: 200%;
             height: 100%;
-            background-image: url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80');
+            background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80');
             background-repeat: repeat-x;
             background-size: cover;
             background-position: bottom;
@@ -58,7 +57,7 @@
              data-am="🏢 የኤች አር የቤት ኪራይ ኢንቨስትመንት - ይከራዩ፣ ይጋብዙ እና ወርሃዊ ደመወዝ ያግኙ! 🏢" 
              data-or="🏢 INVISTIMENTII KIRAAYII MANAA HR - KIRAAYYIFFADHAA, AFFEERAA, JI'AAN KAFALTII ARGADHAA! 🏢" 
              data-tg="🏢 ኢንቨስትመንት ኪራይ ገዛ HR - ተኻረዩ፣ ዓድሙ፣ ብወርሒ ደሞዝ ተቀበሉ! 🏢">
-            🏢 HR HOUSE RENT INVESTMENT - RENT, INVITE, AND EARN MONTHLY SALARY! - 📞 CS: @HRPservice 🏢
+             🏢 HR HOUSE RENT INVESTMENT - RENT, INVITE, AND EARN MONTHLY SALARY! - 📞 CS: @HRPservice 🏢
         </div>
     </div>
 
@@ -149,14 +148,13 @@
 
         <div id="wealth-tab" class="tab-content px-4 space-y-4">
             <div class="glass p-6 rounded-3xl mt-6 text-center">
-                <!-- ማሻሻያ 3፦ በ 24 hr collect ያድርጉ የሚል ጽሑፍ እና የሰዓት ቆጣሪ -->
-                <p class="text-xs text-yellow-500 font-bold mb-2"><i class="fas fa-clock animate-pulse"></i> በ 24 hr collect ያድርጉ / Collect in 24 hrs</p>
+                <p class="text-sm text-yellow-500 font-bold mb-1 uppercase">Daily Income</p>
+                <p class="text-xs text-gray-400 mb-2"><i class="fas fa-clock animate-pulse"></i> በ 24 hr collect ያድርጉ / Collect in 24 hrs</p>
                 <div id="countdown-timer" class="text-lg font-black text-white mb-4 bg-black/40 py-1 px-3 rounded-full w-max mx-auto hidden">24:00:00</div>
                 
                 <button onclick="collectDaily()" class="w-24 h-24 rounded-full border-4 border-yellow-500 text-yellow-500 font-bold mb-4" id="btn-collect">COLLECT</button>
                 <h3 class="text-yellow-500 font-bold mb-2 uppercase" id="lbl-salary">Salary Claim Status</h3>
                 
-                <!-- ማሻሻያ 3፦ የሰዓት እና የሰው ብዛት አመልካች በደመወዝ ክፍል ላይ -->
                 <div class="bg-blue-950/40 p-2 rounded-xl mb-3 text-[11px] border border-white/5 flex justify-around">
                     <div><i class="fas fa-users text-green-400"></i> ጠቅላላ ተጋባዥ: <span id="stat-total-members" class="font-bold text-yellow-500">0</span></div>
                     <div><i class="fas fa-history text-blue-400"></i> ሰዓት: <span id="stat-current-time" class="font-bold text-yellow-500">00:00</span></div>
@@ -170,7 +168,7 @@
             <div class="glass p-4 rounded-2xl grid grid-cols-2 gap-2 text-[10px] text-center">
                 <div class="border border-white/10 p-2 rounded-xl">
                     <p class="text-yellow-500 font-bold" id="lbl-comm-inv">Invite Commission</p>
-                    <p>Lvl A: 25% | B: 2% | C: 1%</p>
+                    <p>Lvl A: 15% | B: 2% | C: 1%</p>
                 </div>
                 <div class="border border-white/10 p-2 rounded-xl">
                     <p class="text-green-500 font-bold" id="lbl-comm-daily">Daily Income Comm.</p>
@@ -187,7 +185,6 @@
                 </div>
             </div>
 
-            <!-- ማሻሻያ 4፦ ስልክ ሳይሆን HRP ID፣ VIP ደረጃ እና ኮሚሽን የሚያሳይ የተሟላ ሰንጠረዥ -->
             <div class="glass p-4 rounded-3xl overflow-x-auto">
                 <h3 class="text-xs font-bold text-yellow-500 mb-2 uppercase" id="lbl-team-list">Team Members</h3>
                 <table class="w-full text-[10px] text-center">
@@ -243,7 +240,7 @@
 
     <div id="withdraw-modal" class="fixed inset-0 bg-black/95 hidden z-[100] p-6">
         <div class="flex justify-between items-center mb-6"><h2>WITHDRAW</h2><button onclick="closeModal('withdraw')" class="text-3xl">&times;</button></div>
-        <p class="text-[10px] text-yellow-500 mb-4">Min: 200 ETB | Daily: 1 time | Sunday: Closed</p>
+        <p class="text-[10px] text-yellow-500 mb-4">Min: 200 ETB | Daily: 1 time | Withdraw Fee: 10% | Sunday: Closed</p>
         <input type="number" id="wd-amt" placeholder="Amount" class="w-full p-4 rounded-xl text-black mb-4 outline-none">
         <input type="password" id="wd-pin-input" placeholder="Enter PIN" class="w-full p-4 rounded-xl text-black mb-4 outline-none">
         <button onclick="processWithdraw()" class="w-full bg-yellow-500 text-black py-4 rounded-xl font-bold uppercase">Submit Withdrawal</button>
@@ -281,7 +278,6 @@
         let userData = {};
         let currentCaptcha = "";
 
-        // ማሻሻያ 3፦ ደመወዝ ላይ ያለው ገቢ የእያንዳንዱ በ 50% ቀንሷል።
         const salaryRules = [
             { id: 1, members: 10, amount: 2000 },
             { id: 2, members: 20, amount: 5000 },
@@ -297,7 +293,6 @@
             tg: { balance: "ጠቅላላ ቀሪ ሕሳብ", deposit: "ገንዘብ አእትው", withdraw: "ወጻኢ ግበር", group: "ጉጅለ", service: "ሓገዝ", invTable: "ሰሌዳ ኢንቨስትመንት", price: "ዋጋ", daily: "ናይ መዓልቲ እቶት", houses: "ዝክረዩ ኣባይቲ", collect: "አክብብ", salary: "ኩነታት ደሞዝ", commInv: "ኮሚሽን ዕድመ", commDaily: "ኮሚሽን መዓልታዊ እቶት", teamList: "ኣባላት ጉጅለ", records: "ጸብጻብ ምንቅስቓስ", profPhone: "ቁጽሪ ቴሌፎን", profId: "ኮድ ዕድመ" }
         };
 
-        // ማሻሻያ 2፦ ሰንጠረዡ ላይ እና Rent ባር የቀን ገቢ በ 4% እንዲሰላ ተደርጓል።
         const rentLevels = [
             {id: 1, price: 1500, daily: 1500 * 0.04, img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=200"},
             {id: 2, price: 3000, daily: 3000 * 0.04, img: "https://images.unsplash.com/photo-1580587767373-197e37604439?w=200"},
@@ -305,6 +300,8 @@
             {id: 4, price: 10000, daily: 10000 * 0.04, img: "https://images.unsplash.com/photo-1600607687940-47a04b629b67?w=200"},
             {id: 5, price: 20000, daily: 20000 * 0.04, img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=200"}
         ];
+
+        let countdownInterval = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -320,13 +317,56 @@
             }
             generateCaptcha();
             generateLiveTransactions();
+            renderInvestmentTable();
             
-            // የሰዓት ማሳያ ማዘመኛ
             setInterval(() => {
                 const now = new Date();
-                document.getElementById('stat-current-time').innerText = now.toTimeString().split(' ')[0].substring(0, 5);
+                const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+                const timeEl = document.getElementById('stat-current-time');
+                if (timeEl) timeEl.innerText = timeStr;
             }, 1000);
         });
+
+        window.switchTab = (tabName) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('nav-active'));
+            
+            const selectedTab = document.getElementById(`${tabName}-tab`);
+            if (selectedTab) selectedTab.classList.add('active-tab');
+            
+            const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(btn => btn.getAttribute('onclick').includes(tabName));
+            if (activeBtn) activeBtn.classList.add('nav-active');
+        };
+
+        window.changeLanguage = (lang) => {
+            const t = translations[lang];
+            if (!t) return;
+            
+            const safeSetText = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
+            
+            safeSetText('lbl-balance', t.balance);
+            safeSetText('nav-deposit', t.deposit);
+            safeSetText('nav-withdraw', t.withdraw);
+            safeSetText('nav-group', t.group);
+            safeSetText('nav-service', t.service);
+            safeSetText('lbl-inv-table', t.invTable);
+            safeSetText('th-price', t.price);
+            safeSetText('th-daily', t.daily);
+            safeSetText('lbl-houses', t.houses);
+            safeSetText('btn-collect', t.collect);
+            safeSetText('lbl-salary', t.salary);
+            safeSetText('lbl-comm-inv', t.commInv);
+            safeSetText('lbl-comm-daily', t.commDaily);
+            safeSetText('lbl-team-list', t.teamList);
+            safeSetText('lbl-records', t.records);
+            safeSetText('lbl-prof-phone', t.profPhone);
+            safeSetText('lbl-prof-id', t.profId);
+
+            const tickerText = document.getElementById('ticker-text');
+            if (tickerText) {
+                tickerText.innerText = tickerText.getAttribute(`data-${lang}`) || tickerText.getAttribute('data-en');
+            }
+        };
 
         window.toggleAuth = (m) => {
             document.getElementById('reg-form').classList.toggle('hidden', m === 'login');
@@ -356,7 +396,6 @@
             
             alert("Registered! You received 100 ETB bonus.");
             
-            // ማሻሻያ 1፦ ከተመዘገቡ በኋላ ስልክና ፓስወርድ አውቶማቲክ አስገብቶ Login ማድረግ
             document.getElementById('login-phone').value = rawPhone;
             document.getElementById('login-pass').value = pass;
             toggleAuth('login');
@@ -383,13 +422,21 @@
             document.getElementById('invite-link-full').innerText = refLink;
             document.getElementById('prof-phone').innerText = userData.phone;
             document.getElementById('prof-id').innerText = userData.myInvite;
+            
+            const qrcodeContainer = document.getElementById("qrcode");
+            if (qrcodeContainer) {
+                qrcodeContainer.innerHTML = "";
+                new QRCode(qrcodeContainer, { text: refLink, width: 128, height: 128 });
+            }
+
             loadSalaryUI();
             updateWealthCountdown();
         }
 
-        // ማሻሻያ 3፦ ቀሪ የ 24 ሰዓት መቁጠሪያ
         function updateWealthCountdown() {
             const timerEl = document.getElementById('countdown-timer');
+            if (countdownInterval) clearInterval(countdownInterval);
+
             if(userData.lastCollect) {
                 timerEl.classList.remove('hidden');
                 const nextCollect = userData.lastCollect + 86400000;
@@ -397,7 +444,7 @@
                     const diff = nextCollect - Date.now();
                     if(diff <= 0) {
                         timerEl.innerText = "00:00:00";
-                        clearInterval(intervalId);
+                        clearInterval(countdownInterval);
                     } else {
                         const hrs = String(Math.floor(diff / 3600000)).padStart(2, '0');
                         const mins = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
@@ -406,7 +453,7 @@
                     }
                 };
                 updateTimer();
-                const intervalId = setInterval(updateTimer, 1000);
+                countdownInterval = setInterval(updateTimer, 1000);
             } else {
                 timerEl.classList.add('hidden');
             }
@@ -464,87 +511,60 @@
             const amt = parseFloat(document.getElementById('wd-amt').value);
             const pin = document.getElementById('wd-pin-input').value;
             const today = new Date();
+            
             if(today.getDay() === 0) return alert("Withdrawal closed on Sunday!");
             if(amt < 200) return alert("Minimum withdrawal is 200 ETB!");
             if(userData.balance < amt) return alert("Insufficient balance!");
             if(pin !== userData.pin) return alert("Incorrect PIN!");
+            
             const lastWd = userData.lastWdDate || "";
             if(lastWd === today.toLocaleDateString()) return alert("Daily limit: 1 time only!");
+            
             await update(ref(db, `users/${currentUser}`), { balance: userData.balance - amt, lastWdDate: today.toLocaleDateString() });
             await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Withdraw", amount: amt, status: "Pending", date: today.toLocaleDateString() });
             alert("Withdrawal submitted!");
             closeModal('withdraw');
         };
 
-        window.changeLanguage = (lang) => {
-            const t = translations[lang];
-            const ticker = document.getElementById('ticker-text');
-            ticker.innerText = ticker.getAttribute('data-' + lang);
-            document.getElementById('lbl-balance').innerText = t.balance;
-            document.getElementById('nav-deposit').innerText = t.deposit;
-            document.getElementById('nav-withdraw').innerText = t.withdraw;
-            document.getElementById('nav-group').innerText = t.group;
-            document.getElementById('nav-service').innerText = t.service;
-            document.getElementById('lbl-inv-table').innerText = t.invTable;
-            document.getElementById('th-price').innerText = t.price;
-            document.getElementById('th-daily').innerText = t.daily;
-            document.getElementById('lbl-houses').innerText = t.houses;
-            document.getElementById('btn-collect').innerText = t.collect;
-            document.getElementById('lbl-salary').innerText = t.salary;
-            document.getElementById('lbl-comm-inv').innerText = t.commInv;
-            document.getElementById('lbl-comm-daily').innerText = t.commDaily;
-            document.getElementById('lbl-team-list').innerText = t.teamList;
-            document.getElementById('lbl-records').innerText = t.records;
-            document.getElementById('lbl-prof-phone').innerText = t.profPhone;
-            document.getElementById('lbl-prof-id').innerText = t.profId;
-        };
-
-        window.copyAccount = () => {
-            const acc = document.getElementById('dep-acc-num').innerText;
-            navigator.clipboard.writeText(acc);
-            alert("Account Copied!");
+        window.collectDaily = async () => {
+            const today = new Date();
+            if(today.getDay() === 0) return alert("Collection closed on Sunday!");
+            
+            if(userData.lastCollect) {
+                const diff = Date.now() - userData.lastCollect;
+                if(diff < 86400000) return alert("You can collect only once every 24 hours!");
+            }
+            
+            let dailyEarnings = 0;
+            const vip = userData.vip || 0;
+            if(vip > 0) {
+                const currentLevel = rentLevels.find(r => r.id === vip);
+                if(currentLevel) dailyEarnings = currentLevel.daily;
+            }
+            
+            if(dailyEarnings <= 0) return alert("No active investment to collect from!");
+            
+            await update(ref(db, `users/${currentUser}`), { 
+                balance: (userData.balance || 0) + dailyEarnings, 
+                lastCollect: Date.now() 
+            });
+            await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { 
+                type: "Daily Income", 
+                amount: dailyEarnings, 
+                status: "Approved", 
+                date: today.toLocaleDateString() 
+            });
+            alert("Daily income collected!");
         };
 
         window.copyInviteLink = () => {
-            const link = document.getElementById('invite-link-full').innerText;
-            navigator.clipboard.writeText(link);
-            alert("Link Copied!");
+            const linkText = document.getElementById('invite-link-full').innerText;
+            navigator.clipboard.writeText(linkText).then(() => alert("Link Copied!"));
         };
 
-        window.collectDaily = async () => {
-            const lvl = rentLevels.find(l => l.id === userData.vip);
-            if(!lvl) return alert("No active rent!");
-            if(Date.now() - (userData.lastCollect || 0) < 86400000) return alert("Already collected!");
-            const income = lvl.daily;
-            await update(ref(db, `users/${currentUser}`), { balance: (userData.balance || 0) + income, lastCollect: Date.now() });
-            await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Daily Income", amount: income, status: "Approved", date: new Date().toLocaleDateString() });
-            distributeComm(income, [0.04, 0.02, 0.01], "Team Income Comm");
-            alert("Collected!");
-        };
-
-        async function distributeComm(amount, rates, label) {
-            let current = userData.inviteBy;
-            for(let rate of rates) {
-                if(!current || current === "HRP") break;
-                const usersSnap = await get(ref(db, 'users'));
-                let parentPhone = null;
-                usersSnap.forEach(u => { if(u.val().myInvite === current) parentPhone = u.key; });
-                if(parentPhone) {
-                    const comm = amount * rate;
-                    const pSnap = await get(ref(db, `users/${parentPhone}`));
-                    await update(ref(db, `users/${parentPhone}`), { balance: (pSnap.val().balance || 0) + comm });
-                    await push(ref(db, `records/${parentPhone.replace(/\+/g, '')}`), { type: label, amount: comm, status: "Approved", date: new Date().toLocaleDateString() });
-                    current = pSnap.val().inviteBy;
-                } else break;
-            }
-        }
-
-        window.rentHouse = async (id) => {
-            const lvl = rentLevels.find(l => l.id === id);
-            if(userData.balance < lvl.price) return alert("Low balance!");
-            await update(ref(db, `users/${currentUser}`), { balance: userData.balance - lvl.price, vip: id });
-            distributeComm(lvl.price, [0.25, 0.02, 0.01], "Invite Commission");
-            alert("Rent Successful!");
+        window.copyAccount = () => {
+            const accNum = document.getElementById('dep-acc-num').innerText;
+            navigator.clipboard.writeText(accNum).then(() => alert("Account Number Copied!"));
         };
 
         window.saveBank = async () => {
@@ -552,113 +572,112 @@
             const bank = document.getElementById('bank-select').value;
             const acc = document.getElementById('bank-acc').value;
             const pin = document.getElementById('save-pin').value;
+
             if(!name || !acc || !pin) return alert("Fill all fields");
-            if(pin !== userData.pin) return alert("Wrong PIN");
-            await update(ref(db, `users/${currentUser}`), { bankName: name, bankSelect: bank, bankAcc: acc });
-            alert("Bank Info Saved!");
+            if(pin !== userData.pin) return alert("Wrong Withdrawal PIN");
+
+            await update(ref(db, `users/${currentUser}`), { bankInfo: { fullName: name, bankName: bank, account: acc } });
+            alert("Bank Info Saved Successfully!");
         };
+
+        function renderInvestmentTable() {
+            let html = "";
+            rentLevels.forEach(r => {
+                html += `<tr class="border-b border-white/10"><td class="p-2 font-bold text-yellow-500">VIP ${r.id}</td><td class="p-2">${r.price} ETB</td><td class="p-2 text-green-400">+${r.daily.toFixed(2)} ETB</td></tr>`;
+            });
+            document.getElementById('inv-table-body').innerHTML = html;
+        }
 
         function renderRent() {
-            let rHtml = "";
-            let tHtml = "";
-            rentLevels.forEach(l => {
-                rHtml += `<div class="glass p-4 rounded-3xl flex gap-4 items-center"><img src="${l.img}" class="w-20 h-20 rounded-2xl object-cover"><div class="flex-1"><h4 class="font-bold text-yellow-500">VIP HOUSE ${l.id}</h4><p class="text-xs opacity-60">Price: ${l.price} ETB</p><p class="text-xs text-green-400">Daily: ${l.daily} ETB (4%)</p></div><button onclick="rentHouse(${l.id})" class="bg-yellow-500 text-black font-black px-4 py-2 rounded-xl text-xs uppercase">Rent</button></div>`;
-                tHtml += `<tr class="border-b border-white/10"><td class="p-2 font-bold text-yellow-500">VIP ${l.id}</td><td class="p-2">${l.price} ETB</td><td class="p-2 text-green-400">${l.daily} ETB</td></tr>`;
-            });
-            document.getElementById('rent-grid').innerHTML = rHtml;
-            document.getElementById('inv-table-body').innerHTML = tHtml;
-        }
-
-        // ማሻሻያ 4፦ የቡድን ሰንጠረዥን ሙሉ በሙሉ በ HRP ID፣ VIP እና ኮሚሽን ማደራጀት
-        async function loadTeam() {
-            if(!currentUser) return;
-            const snap = await get(ref(db, 'users'));
-            const allUsers = [];
-            snap.forEach(u => { allUsers.push(u.val()); });
-
-            let tBody = "";
-            
-            // Level A
-            allUsers.forEach(u => {
-                if(u.inviteBy === userData.myInvite) {
-                    tBody += renderTeamRow(u.myInvite, "Level A", u.vip, 0.25);
-                    
-                    // Level B
-                    allUsers.forEach(u2 => {
-                        if(u2.inviteBy === u.myInvite) {
-                            tBody += renderTeamRow(u2.myInvite, "Level B", u2.vip, 0.02);
-                            
-                            // Level C
-                            allUsers.forEach(u3 => {
-                                if(u3.inviteBy === u2.myInvite) {
-                                    tBody += renderTeamRow(u3.myInvite, "Level C", u3.vip, 0.01);
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-            
-            document.getElementById('team-members-body').innerHTML = tBody || `<tr><td colspan="5" class="p-4 opacity-50">No team members yet</td></tr>`;
-            
-            // QRCode
-            document.getElementById('qrcode').innerHTML = "";
-            const refLink = window.location.origin + window.location.pathname + "?rf=" + (userData.myInvite || "");
-            new QRCode(document.getElementById("qrcode"), { text: refLink, width: 100, height: 100 });
-        }
-
-        function renderTeamRow(id, level, vip, rate) {
-            const isRented = (vip || 0) > 0;
-            const statusText = isRented ? '<span class="text-green-400">የተከራየ</span>' : '<span class="text-red-400">ያልተከራየ</span>';
-            let calculatedComm = 0;
-            if(isRented) {
-                const lvlPrice = rentLevels.find(l => l.id === vip)?.price || 0;
-                calculatedComm = lvlPrice * rate;
-            }
-            return `<tr class="border-b border-white/10"><td class="py-2 font-bold">${id}</td><td>${level}</td><td>VIP ${vip || 0}</td><td>${statusText}</td><td class="text-green-400">+${calculatedComm}</td></tr>`;
-        }
-
-        async function loadRecords() {
-            const snap = await get(ref(db, `records/${currentUser.replace(/\+/g, '')}`));
-            let rHtml = "";
-            if(snap.exists()) {
-                snap.forEach(r => {
-                    const d = r.val();
-                    rHtml += `<div class="glass p-3 rounded-xl flex justify-between text-xs"><div><p class="font-bold">${d.type}</p><p class="text-[9px] opacity-50">${d.date}</p></div><div class="text-right"><p class="font-bold text-yellow-500">${d.amount} ETB</p><p class="text-[9px] ${d.status==='Approved'?'text-green-400':'text-yellow-400'}">${d.status}</p></div></div>`;
-                });
-            } else rHtml = "<p class='text-center opacity-50 text-xs'>No records</p>";
-            document.getElementById('record-list').innerHTML = rHtml;
-        }
-
-        // ማሻሻያ 5፦ Live Transaction ስልክ ቁጥሮች የተለያዩ የኢትዮጵያ አውታረ መረቦች እንዲሆኑ ማድረግ (09... እና 07... ቤቶች)
-        window.generateLiveTransactions = () => {
-            const prefixes = ["0911", "0912", "0920", "0930", "0940", "0970", "0988", "0707", "0712", "0799"];
-            const methods = ["CBE", "Telebirr", "Abyssinia"];
-            const types = ["Deposit", "Withdrawal"];
             let html = "";
-            
-            for(let i = 0; i < 30; i++) {
-                const pref = prefixes[Math.floor(Math.random() * prefixes.length)];
-                const randPhone = pref + "***" + Math.floor(1000 + Math.random() * 9000);
-                const method = methods[Math.floor(Math.random() * methods.length)];
-                const type = types[Math.floor(Math.random() * types.length)];
-                const amt = Math.floor(500 + Math.random() * 45000);
-                const color = type === "Deposit" ? "text-green-400" : "text-red-400";
-                
-                html += `<div class="flex justify-between items-center text-[11px] bg-white/5 p-2 rounded-xl border border-white/5">
-                            <div><span class="font-bold text-gray-300">${randPhone}</span> via <span class="text-blue-400 font-bold">${method}</span></div>
-                            <div class="text-right"><span class="${color} font-black">${type}</span> <span class="text-yellow-500 font-bold">${amt} ETB</span></div>
-                         </div>`;
+            rentLevels.forEach(r => {
+                html += `
+                <div class="glass p-4 rounded-3xl flex items-center gap-4">
+                    <img src="${r.img}" class="w-20 h-20 rounded-2xl object-cover border border-white/10">
+                    <div class="flex-1">
+                        <h4 class="font-bold text-yellow-500">VIP House ${r.id}</h4>
+                        <p class="text-[11px] opacity-70">Price: <span class="text-white font-bold">${r.price} ETB</span></p>
+                        <p class="text-[11px] text-green-400">Daily: +${r.daily.toFixed(2)} ETB</p>
+                        <button onclick="buyRent(${r.id}, ${r.price})" class="mt-2 bg-yellow-500 text-black font-bold text-[10px] px-4 py-1 rounded-lg uppercase">Rent Now</button>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('rent-grid').innerHTML = html;
+        }
+
+        window.buyRent = async (id, price) => {
+            if((userData.vip || 0) >= id) return alert("You already have this or a higher VIP house!");
+            if(userData.balance < price) return alert("Insufficient balance to rent this house!");
+
+            if(confirm(`Are you sure you want to rent VIP House ${id} for ${price} ETB?`)) {
+                await update(ref(db, `users/${currentUser}`), { 
+                    balance: userData.balance - price,
+                    vip: id
+                });
+                await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { 
+                    type: "Rent Upgrade", 
+                    amount: price, 
+                    status: "Approved", 
+                    date: new Date().toLocaleDateString() 
+                });
+                alert(`Successfully rented VIP House ${id}!`);
             }
-            document.getElementById('live-ticker').innerHTML = html + html;
         };
 
-        window.switchTab = (tab) => {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active-tab'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-            document.getElementById(tab + '-tab').classList.add('active-tab');
-            event.currentTarget.classList.add('nav-active');
-        };
+        function loadRecords() {
+            onValue(ref(db, `records/${currentUser.replace(/\+/g, '')}`), snap => {
+                let html = "";
+                if(snap.exists()) {
+                    snap.forEach(child => {
+                        const r = child.val();
+                        let color = r.status === "Approved" ? "text-green-400" : "text-yellow-500";
+                        if(r.status === "Rejected") color = "text-red-400";
+                        html += `
+                        <div class="glass p-3 rounded-xl flex justify-between text-xs items-center">
+                            <div><p class="font-bold">${r.type}</p><p class="text-[10px] opacity-50">${r.date}</p></div>
+                            <div class="text-right"><p class="font-bold">${r.amount} ETB</p><p class="${color} text-[10px] uppercase font-bold">${r.status}</p></div>
+                        </div>`;
+                    });
+                } else {
+                    html = "<p class='text-xs opacity-50 text-center py-4'>No transaction records found.</p>";
+                }
+                document.getElementById('record-list').innerHTML = html;
+            });
+        }
+
+        async function loadTeam() {
+            const usersSnap = await get(ref(db, 'users'));
+            let html = "";
+            if(usersSnap.exists()) {
+                usersSnap.forEach(u => {
+                    const m = u.val();
+                    if(m.inviteBy === userData.myInvite) {
+                        html += `
+                        <tr class="border-b border-white/5">
+                            <td class="py-2">${m.myInvite || '---'}</td>
+                            <td>Level A</td>
+                            <td class="text-yellow-500 font-bold">VIP ${m.vip || 0}</td>
+                            <td class="text-green-400">Active</td>
+                            <td>---</td>
+                        </tr>`;
+                    }
+                });
+            }
+            document.getElementById('team-members-body').innerHTML = html || `<tr><td colspan="5" class="py-4 opacity-50 text-center">No team members yet.</td></tr>`;
+        }
+
+        function generateLiveTransactions() {
+            const wrapper = document.getElementById('live-ticker');
+            if(!wrapper) return;
+            const prefix = ["09", "07"];
+            let items = "";
+            for (let i = 0; i < 15; i++) {
+                let randPhone = prefix[Math.floor(Math.random() * prefix.length)] + Math.floor(10000000 + Math.random() * 90000000).toString().substring(0, 8) + "***";
+                let amount = [200, 500, 1200, 2500, 5000, 8000][Math.floor(Math.random() * 6)];
+                items += `<div class="bg-white/5 p-2 rounded-xl flex justify-between text-[11px] border border-white/5"><span><i class="fas fa-arrow-circle-down text-red-400"></i> Member ${randPhone}</span><span class="text-green-400 font-bold">+${amount} ETB</span></div>`;
+            }
+            wrapper.innerHTML = items + items; 
+        }
     </script>
 </body>
 </html>
