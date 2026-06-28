@@ -13,7 +13,7 @@
         
         body { 
             position: relative;
-            background: #0f172a; 
+            background: #022c1a; 
             font-family: 'Inter', sans-serif; 
             color: white; 
             overflow-x: hidden; 
@@ -38,21 +38,179 @@
             100% { transform: translateX(-50%); }
         }
 
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass { 
+            background: rgba(0, 80, 40, 0.18); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(52, 211, 153, 0.18); 
+        }
         .tab-content { display: none; }
         .active-tab { display: block; }
-        .nav-active { color: #fbbf24; border-top: 2px solid #fbbf24; }
-        .captcha-box { background: #334155; font-family: 'Courier New', Courier, monospace; letter-spacing: 5px; user-select: none; }
-        
-        .ticker-container { height: 160px; overflow: hidden; position: relative; }
-        .ticker-wrapper { position: absolute; width: 100%; animation: scroll-ticker 20s linear infinite; }
-        .ticker-wrapper:hover { animation-play-state: paused; }
-        @keyframes scroll-ticker { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
+        .nav-active { color: #34d399; border-top: 2px solid #34d399; }
+        .captcha-box { background: #064e3b; font-family: 'Courier New', Courier, monospace; letter-spacing: 5px; user-select: none; }
+
+        /* ===== FLOATING INFO MODAL ===== */
+        #info-float-btn {
+            position: fixed;
+            bottom: 90px;
+            right: 18px;
+            z-index: 200;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #059669, #34d399);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 0 0 0 rgba(52,211,153,0.7);
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse-ring {
+            0%   { box-shadow: 0 0 0 0 rgba(52,211,153,0.7); }
+            70%  { box-shadow: 0 0 0 14px rgba(52,211,153,0); }
+            100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+        }
+        #info-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.72);
+            z-index: 300;
+            align-items: center;
+            justify-content: center;
+        }
+        #info-modal-overlay.visible { display: flex; }
+        #info-modal-box {
+            background: linear-gradient(135deg, #064e3b 0%, #022c1a 60%, #065f46 100%);
+            border: 1.5px solid rgba(52,211,153,0.35);
+            border-radius: 24px;
+            padding: 28px 22px;
+            max-width: 340px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 8px 40px rgba(52,211,153,0.18);
+        }
+        #info-modal-box h2 {
+            color: #34d399;
+            font-size: 1.1rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 14px;
+            letter-spacing: 1px;
+        }
+        #info-modal-box .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        #info-modal-box .step-num {
+            min-width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#059669,#34d399);
+            color: #000;
+            font-weight: 900;
+            font-size: 0.78rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #info-modal-box .step-text {
+            font-size: 0.72rem;
+            color: #d1fae5;
+            line-height: 1.5;
+        }
+        #info-modal-box .step-text strong { color: #6ee7b7; }
+        #close-info-modal {
+            position: absolute;
+            top: 12px; right: 16px;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: #6ee7b7;
+            line-height: 1;
+        }
+
+        /* ===== GREEN GRADIENT THEME ===== */
+        .balance-card {
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+            border: 1.5px solid rgba(52,211,153,0.3);
+            box-shadow: 0 4px 32px rgba(52,211,153,0.13);
+        }
+        .nav-bar-custom {
+            background: linear-gradient(180deg, rgba(2,44,26,0.97) 0%, rgba(4,60,35,0.99) 100%);
+            border-top: 1.5px solid rgba(52,211,153,0.22);
+        }
+        .ticker-top {
+            background: linear-gradient(90deg, #064e3b, #047857, #064e3b);
+        }
+
+        /* Shimmering highlight on glass cards */
+        .glass-card-glow {
+            background: linear-gradient(135deg, rgba(6,78,59,0.55) 0%, rgba(4,120,87,0.25) 100%);
+            border: 1px solid rgba(52,211,153,0.22);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 16px rgba(52,211,153,0.07);
+        }
+
+        /* Animated gradient border on balance */
+        @keyframes border-glow {
+            0%,100% { box-shadow: 0 0 16px 2px rgba(52,211,153,0.25); }
+            50%      { box-shadow: 0 0 32px 6px rgba(16,185,129,0.45); }
+        }
+        .balance-glow { animation: border-glow 3s ease-in-out infinite; }
+
+        /* Green highlight table header */
+        .tbl-header { background: linear-gradient(90deg,#059669,#34d399); color: #000; }
+
+        /* Colored button styles */
+        .btn-green { background: linear-gradient(135deg,#059669,#34d399); color: #000; }
+        .btn-green:hover { filter: brightness(1.1); }
     </style>
 </head>
 <body class="pb-24">
-    <div class="bg-blue-900 overflow-hidden py-2 sticky top-0 z-50">
-        <div id="ticker-text" class="moving-text font-bold text-xs uppercase" 
+
+    <!-- ===== FLOATING INFO BUTTON ===== -->
+    <div id="info-float-btn" onclick="document.getElementById('info-modal-overlay').classList.add('visible')">
+        <i class="fas fa-info" style="color:#000;font-size:1.1rem;"></i>
+    </div>
+
+    <!-- ===== INFO MODAL ===== -->
+    <div id="info-modal-overlay">
+        <div id="info-modal-box">
+            <span id="close-info-modal" onclick="document.getElementById('info-modal-overlay').classList.remove('visible')">&times;</span>
+            <h2>📋 የአፑ አሰራር</h2>
+
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-text"><strong>ይመዝገቡ:</strong> ስልክ ቁጥርዎን፣ የይለፍ ቃልዎን እና የግብዣ ኮድ ያስገቡ። ሲመዘገቡ <strong>100 ETB ጀምሮ ቦነስ</strong> ያገኛሉ።</div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-text"><strong>ያስቀምጡ (Deposit):</strong> ወደ CBE ሒሳብ ገንዘብ ያስቀምጡ፣ FT ቁጥሩን ያስገቡ። ቡጀቱ ሲፀድቅ ወደ ሒሳቦ ይጨምራል።</div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-text"><strong>ቤት ይከራዩ (Rent):</strong> VIP ቤት ይምረጡ። ለምሳሌ VIP 1 = 1,500 ETB ⟶ <strong>በቀን 150 ETB</strong> ያስገኛሉ (10%)።</div>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-text"><strong>ገቢ ይሰብስቡ (Collect):</strong> Wealth 탭 ላይ ሄደው በ24 ሰዓት <strong>COLLECT</strong> ይጫኑ። ትርፉ ወደ ሒሳቦ ይጨምራል።</div>
+            </div>
+            <div class="step">
+                <div class="step-num">5</div>
+                <div class="step-text"><strong>ይጋብዙ & ያትርፉ:</strong> ወዳጆቻቸው ሲጋብዙ እና ቤት ሲከራዩ <strong>15% ኮሚሽን</strong> ያገኛሉ። ደረጃ B: 2%, C: 1%።</div>
+            </div>
+            <div class="step">
+                <div class="step-num">6</div>
+                <div class="step-num" style="background:linear-gradient(135deg,#dc2626,#f87171);min-width:26px;">!</div>
+                <div class="step-text"><strong>ማስጠንቀቂያ:</strong> ዕለታዊ ወጪ (Withdraw) ዝቅተኛ 200 ETB፣ ቀን 3 ጊዜ ብቻ፣ ሰኞ–ቅዳሜ ብቻ ይሠራል።</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ticker-top overflow-hidden py-2 sticky top-0 z-50">
+        <div id="ticker-text" class="moving-text font-bold text-xs uppercase text-emerald-200" 
              data-en="🏢 HR HOUSE RENT INVESTMENT - RENT, INVITE, AND EARN MONTHLY SALARY! - 📞 CS: @HRPservice 🏢" 
              data-am="🏢 የኤች አር የቤት ኪራይ ኢንቨስትመንት - ይከራዩ፣ ይጋብዙ እና ወርሃዊ ደመወዝ ያግኙ! 🏢" 
              data-or="🏢 INVISTIMENTII KIRAAYII MANAA HR - KIRAAYYIFFADHAA, AFFEERAA, JI'AAN KAFALTII ARGADHAA! 🏢" 
@@ -61,45 +219,45 @@
         </div>
     </div>
 
-    <section id="auth-section" class="max-w-md mx-auto mt-10 p-6 glass rounded-3xl mx-4">
-        <div class="flex justify-around mb-8 border-b border-gray-700 pb-3">
-            <button onclick="toggleAuth('reg')" id="reg-btn" class="text-xl font-bold border-b-4 border-yellow-500">Register</button>
+    <section id="auth-section" class="max-w-md mx-auto mt-10 p-6 glass-card-glow rounded-3xl mx-4">
+        <div class="flex justify-around mb-8 border-b border-emerald-700/40 pb-3">
+            <button onclick="toggleAuth('reg')" id="reg-btn" class="text-xl font-bold border-b-4 border-emerald-400">Register</button>
             <button onclick="toggleAuth('login')" id="login-btn" class="text-xl font-bold opacity-50">Login</button>
         </div>
 
         <div id="reg-form" class="space-y-4">
             <div class="flex">
-                <span class="bg-gray-700 p-3 rounded-l-xl border border-gray-500">+251</span>
-                <input type="number" id="reg-phone" placeholder="9..." class="flex-1 bg-black/40 p-3 rounded-r-xl border border-gray-500 outline-none text-white">
+                <span class="bg-emerald-900/60 p-3 rounded-l-xl border border-emerald-700/50">+251</span>
+                <input type="number" id="reg-phone" placeholder="9..." class="flex-1 bg-black/40 p-3 rounded-r-xl border border-emerald-700/40 outline-none text-white">
             </div>
-            <input type="password" id="reg-pass" placeholder="Password" class="w-full bg-black/40 p-3 rounded-xl border border-gray-500 outline-none">
-            <input type="password" id="reg-pin" placeholder="Withdrawal PIN" class="w-full bg-black/40 p-3 rounded-xl border border-gray-500 outline-none">
+            <input type="password" id="reg-pass" placeholder="Password" class="w-full bg-black/40 p-3 rounded-xl border border-emerald-700/40 outline-none text-emerald-100">
+            <input type="password" id="reg-pin" placeholder="Withdrawal PIN" class="w-full bg-black/40 p-3 rounded-xl border border-emerald-700/40 outline-none text-emerald-100">
             
             <div class="flex gap-2">
-                <input type="text" id="reg-invite" placeholder="የግብዣ ኮድ" class="flex-1 bg-black/40 p-3 rounded-xl border border-gray-500 outline-none uppercase text-white font-bold">
-                <span class="bg-gray-700 px-4 rounded-xl border border-gray-500 text-xs flex items-center justify-center font-bold text-yellow-500">CODE</span>
+                <input type="text" id="reg-invite" placeholder="የግብዣ ኮድ" class="flex-1 bg-black/40 p-3 rounded-xl border border-emerald-700/40 outline-none uppercase text-white font-bold">
+                <span class="bg-emerald-900/60 px-4 rounded-xl border border-emerald-700/40 text-xs flex items-center justify-center font-bold text-emerald-400">CODE</span>
             </div>
 
             <div class="flex gap-2">
-                <input type="text" id="reg-captcha-input" placeholder="Code" class="flex-1 bg-black/40 p-3 rounded-xl border border-gray-500 outline-none text-center">
-                <div onclick="generateCaptcha()" id="captcha-display" class="captcha-box px-4 py-3 rounded-xl text-yellow-500 font-black cursor-pointer"></div>
+                <input type="text" id="reg-captcha-input" placeholder="Code" class="flex-1 bg-black/40 p-3 rounded-xl border border-emerald-700/40 outline-none text-center">
+                <div onclick="generateCaptcha()" id="captcha-display" class="captcha-box px-4 py-3 rounded-xl text-emerald-400 font-black cursor-pointer"></div>
             </div>
-            <button onclick="handleRegister()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl shadow-lg">Register Now</button>
+            <button onclick="handleRegister()" class="w-full btn-green font-black py-4 rounded-2xl shadow-lg">Register Now</button>
         </div>
 
         <div id="login-form" class="hidden space-y-4">
             <div class="flex">
-                <span class="bg-gray-700 p-3 rounded-l-xl border border-gray-500">+251</span>
-                <input type="number" id="login-phone" placeholder="9..." class="flex-1 bg-black/40 p-3 rounded-r-xl border border-gray-500 outline-none text-white">
+                <span class="bg-emerald-900/60 p-3 rounded-l-xl border border-emerald-700/50">+251</span>
+                <input type="number" id="login-phone" placeholder="9..." class="flex-1 bg-black/40 p-3 rounded-r-xl border border-emerald-700/40 outline-none text-white">
             </div>
-            <input type="password" id="login-pass" placeholder="Password" class="w-full bg-black/40 p-3 rounded-xl border border-gray-500 outline-none">
-            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg">Login</button>
+            <input type="password" id="login-pass" placeholder="Password" class="w-full bg-black/40 p-3 rounded-xl border border-emerald-700/40 outline-none text-emerald-100">
+            <button onclick="handleLogin()" class="w-full bg-emerald-700 text-white font-black py-4 rounded-2xl shadow-lg">Login</button>
         </div>
     </section>
 
     <main id="main-app" class="hidden max-w-md mx-auto relative">
         <div class="absolute right-4 top-4 z-10">
-            <select id="langSwitcher" onchange="changeLanguage(this.value)" class="bg-blue-900 text-white text-xs p-1 rounded border border-yellow-500 outline-none">
+            <select id="langSwitcher" onchange="changeLanguage(this.value)" class="bg-emerald-900/80 text-white text-xs p-1 rounded border border-emerald-500 outline-none">
                 <option value="en">English</option>
                 <option value="am">አማርኛ</option>
                 <option value="or">Afaan Oromoo</option>
@@ -107,57 +265,38 @@
             </select>
         </div>
 
-        <div class="p-8 text-center glass m-4 rounded-3xl mt-8">
-            <p class="text-gray-400 text-sm uppercase" id="lbl-balance">Total Balance</p>
-            <h2 class="text-5xl font-black text-yellow-500 mt-2"><span id="user-balance">0.00</span> <small class="text-sm text-white">ETB</small></h2>
-            <p class="text-xs mt-3 bg-white/10 w-max mx-auto px-4 py-1 rounded-full">VIP Level: <span id="user-vip" class="text-green-400 font-bold">0</span></p>
+        <div class="p-8 text-center balance-card balance-glow m-4 rounded-3xl mt-8">
+            <p class="text-emerald-300 text-sm uppercase tracking-widest" id="lbl-balance">Total Balance</p>
+            <h2 class="text-5xl font-black text-emerald-300 mt-2"><span id="user-balance">0.00</span> <small class="text-sm text-white">ETB</small></h2>
+            <p class="text-xs mt-3 bg-white/10 w-max mx-auto px-4 py-1 rounded-full">VIP Level: <span id="user-vip" class="text-emerald-300 font-bold">0</span></p>
         </div>
 
         <div id="home-tab" class="tab-content active-tab px-4 space-y-6">
             <div class="grid grid-cols-4 gap-3 py-4">
-                <div onclick="showModal('deposit')" class="glass p-3 rounded-2xl text-center cursor-pointer"><i class="fas fa-plus-circle text-green-400 mb-1"></i><p class="text-[9px]" id="nav-deposit">Deposit</p></div>
-                <div onclick="showModal('withdraw')" class="glass p-3 rounded-2xl text-center cursor-pointer"><i class="fas fa-minus-circle text-red-400 mb-1"></i><p class="text-[9px]" id="nav-withdraw">Withdraw</p></div>
-                <div onclick="window.open('https://t.me/+lcaEds42Oi1lNjU0')" class="glass p-3 rounded-2xl text-center cursor-pointer"><i class="fab fa-telegram text-blue-400 mb-1"></i><p class="text-[9px]" id="nav-group">Group</p></div>
-                <div onclick="window.open('https://t.me/HRPservice')" class="glass p-3 rounded-2xl text-center cursor-pointer"><i class="fas fa-headset text-blue-400 mb-1"></i><p class="text-[9px]" id="nav-service">Service</p></div>
-            </div>
-
-            <div class="glass p-4 rounded-3xl">
-                <h3 class="text-center font-bold text-yellow-500 mb-3 text-sm uppercase" id="lbl-inv-table">Investment Table</h3>
-                <table class="w-full text-xs text-center">
-                    <thead class="bg-yellow-500 text-black">
-                        <tr><th class="p-2">VIP</th><th class="p-2" id="th-price">Price</th><th class="p-2" id="th-daily">Daily</th></tr>
-                    </thead>
-                    <tbody id="inv-table-body"></tbody>
-                </table>
-            </div>
-
-            <div class="glass p-4 rounded-3xl">
-                <h3 class="text-center font-bold text-green-400 mb-3 text-sm uppercase flex items-center justify-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> LIVE TRANSACTIONS
-                </h3>
-                <div class="ticker-container">
-                    <div id="live-ticker" class="ticker-wrapper space-y-2"></div>
-                </div>
+                <div onclick="showModal('deposit')" class="glass-card-glow p-3 rounded-2xl text-center cursor-pointer hover:scale-105 transition-transform"><i class="fas fa-plus-circle text-emerald-400 mb-1 text-lg"></i><p class="text-[9px]" id="nav-deposit">Deposit</p></div>
+                <div onclick="showModal('withdraw')" class="glass-card-glow p-3 rounded-2xl text-center cursor-pointer hover:scale-105 transition-transform"><i class="fas fa-minus-circle text-red-400 mb-1 text-lg"></i><p class="text-[9px]" id="nav-withdraw">Withdraw</p></div>
+                <div onclick="window.open('https://t.me/+lcaEds42Oi1lNjU0')" class="glass-card-glow p-3 rounded-2xl text-center cursor-pointer hover:scale-105 transition-transform"><i class="fab fa-telegram text-sky-400 mb-1 text-lg"></i><p class="text-[9px]" id="nav-group">Group</p></div>
+                <div onclick="window.open('https://t.me/HRPservice')" class="glass-card-glow p-3 rounded-2xl text-center cursor-pointer hover:scale-105 transition-transform"><i class="fas fa-headset text-sky-400 mb-1 text-lg"></i><p class="text-[9px]" id="nav-service">Service</p></div>
             </div>
         </div>
 
         <div id="rent-tab" class="tab-content px-4 space-y-4">
-            <h3 class="font-bold border-l-4 border-yellow-500 pl-2 mt-4 uppercase" id="lbl-houses">Available Houses</h3>
+            <h3 class="font-bold border-l-4 border-emerald-400 pl-2 mt-4 uppercase text-emerald-300" id="lbl-houses">Available Houses</h3>
             <div id="rent-grid" class="space-y-4"></div>
         </div>
 
         <div id="wealth-tab" class="tab-content px-4 space-y-4">
-            <div class="glass p-6 rounded-3xl mt-6 text-center">
-                <p class="text-sm text-yellow-500 font-bold mb-1 uppercase">Daily Income</p>
+            <div class="glass-card-glow p-6 rounded-3xl mt-6 text-center">
+                <p class="text-sm text-emerald-400 font-bold mb-1 uppercase">Daily Income</p>
                 <p class="text-xs text-gray-400 mb-2"><i class="fas fa-clock animate-pulse"></i> በ 24 hr collect ያድርጉ / Collect in 24 hrs</p>
                 <div id="countdown-timer" class="text-lg font-black text-white mb-4 bg-black/40 py-1 px-3 rounded-full w-max mx-auto hidden">24:00:00</div>
                 
-                <button onclick="collectDaily()" class="w-24 h-24 rounded-full border-4 border-yellow-500 text-yellow-500 font-bold mb-4" id="btn-collect">COLLECT</button>
-                <h3 class="text-yellow-500 font-bold mb-2 uppercase" id="lbl-salary">Salary Claim Status</h3>
+                <button onclick="collectDaily()" class="w-24 h-24 rounded-full border-4 border-emerald-400 text-emerald-300 font-bold mb-4 hover:bg-emerald-900/40 transition-colors" id="btn-collect">COLLECT</button>
+                <h3 class="text-emerald-400 font-bold mb-2 uppercase" id="lbl-salary">Salary Claim Status</h3>
                 
-                <div class="bg-blue-950/40 p-2 rounded-xl mb-3 text-[11px] border border-white/5 flex justify-around">
-                    <div><i class="fas fa-users text-green-400"></i> ጠቅላላ ተጋባዥ: <span id="stat-total-members" class="font-bold text-yellow-500">0</span></div>
-                    <div><i class="fas fa-history text-blue-400"></i> ሰዓት: <span id="stat-current-time" class="font-bold text-yellow-500">00:00</span></div>
+                <div class="bg-emerald-950/40 p-2 rounded-xl mb-3 text-[11px] border border-emerald-800/30 flex justify-around">
+                    <div><i class="fas fa-users text-emerald-400"></i> ጠቅላላ ተጋባዥ: <span id="stat-total-members" class="font-bold text-emerald-300">0</span></div>
+                    <div><i class="fas fa-history text-sky-400"></i> ሰዓት: <span id="stat-current-time" class="font-bold text-emerald-300">00:00</span></div>
                 </div>
                 
                 <div id="salary-list" class="text-[11px] space-y-3"></div>
@@ -165,39 +304,38 @@
         </div>
 
         <div id="team-tab" class="tab-content px-4 space-y-4 mt-6">
-            <div class="glass p-4 rounded-2xl grid grid-cols-2 gap-2 text-[10px] text-center">
-                <div class="border border-white/10 p-2 rounded-xl">
-                    <p class="text-yellow-500 font-bold" id="lbl-comm-inv">Invite Commission</p>
-                    <p>Lvl A: 15% | B: 2% | C: 1%</p>
+            <div class="glass-card-glow p-4 rounded-2xl grid grid-cols-2 gap-2 text-[10px] text-center">
+                <div class="border border-emerald-700/30 p-2 rounded-xl">
+                    <p class="text-emerald-400 font-bold" id="lbl-comm-inv">Invite Commission</p>
+                    <p class="text-emerald-200">Lvl A: 15% | B: 2% | C: 1%</p>
                 </div>
-                <div class="border border-white/10 p-2 rounded-xl">
-                    <p class="text-green-500 font-bold" id="lbl-comm-daily">Daily Income Comm.</p>
-                    <p>Lvl A: 4% | B: 2% | C: 1%</p>
+                <div class="border border-emerald-700/30 p-2 rounded-xl">
+                    <p class="text-green-400 font-bold" id="lbl-comm-daily">Daily Income Comm.</p>
+                    <p class="text-emerald-200">Lvl A: 4% | B: 2% | C: 1%</p>
                 </div>
             </div>
 
-            <div class="glass p-6 rounded-3xl flex flex-col items-center">
+            <div class="glass-card-glow p-6 rounded-3xl flex flex-col items-center">
                 <div id="qrcode" class="bg-white p-2 rounded-lg mb-4"></div>
                 <div class="bg-black/40 p-3 rounded-xl w-full text-center">
                     <p class="text-[9px] text-gray-400 mb-1">Invitation Link:</p>
-                    <span id="invite-link-full" class="text-[10px] font-bold text-yellow-500 block mb-2 break-all"></span>
-                    <button onclick="copyInviteLink()" class="bg-yellow-500 text-black px-6 py-1 rounded text-xs font-bold uppercase">Copy Link</button>
+                    <span id="invite-link-full" class="text-[10px] font-bold text-emerald-400 block mb-2 break-all"></span>
+                    <button onclick="copyInviteLink()" class="btn-green px-6 py-1 rounded text-xs font-bold uppercase">Copy Link</button>
                 </div>
             </div>
 
-            <!-- Team Commission History List (የቡድን ኮሚሽን ሎግ) -->
-            <div class="glass p-4 rounded-3xl">
-                <h3 class="text-xs font-bold text-green-400 mb-2 uppercase">Team Commission Logs</h3>
+            <div class="glass-card-glow p-4 rounded-3xl">
+                <h3 class="text-xs font-bold text-emerald-400 mb-2 uppercase">Team Commission Logs</h3>
                 <div id="team-comm-logs" class="space-y-1 max-h-40 overflow-y-auto text-[9px]">
                     <p class="text-gray-500 text-center py-2">No commissions recorded yet.</p>
                 </div>
             </div>
 
-            <div class="glass p-4 rounded-3xl overflow-x-auto">
-                <h3 class="text-xs font-bold text-yellow-500 mb-2 uppercase" id="lbl-team-list">Team Members</h3>
+            <div class="glass-card-glow p-4 rounded-3xl overflow-x-auto">
+                <h3 class="text-xs font-bold text-emerald-400 mb-2 uppercase" id="lbl-team-list">Team Members</h3>
                 <table class="w-full text-[10px] text-center">
                     <thead>
-                        <tr class="border-b border-white/20 text-yellow-500">
+                        <tr class="border-b border-emerald-700/30 text-emerald-400">
                             <th class="pb-2">HRP ID</th>
                             <th class="pb-2">Level</th>
                             <th class="pb-2">VIP</th>
@@ -210,32 +348,32 @@
         </div>
 
         <div id="record-tab" class="tab-content px-4 mt-6">
-            <h3 class="text-yellow-500 font-bold mb-4 uppercase" id="lbl-records">Records</h3>
+            <h3 class="text-emerald-400 font-bold mb-4 uppercase" id="lbl-records">Records</h3>
             <div id="record-list" class="space-y-2"></div>
         </div>
 
         <div id="profile-tab" class="tab-content px-4 space-y-4 mt-6">
-            <div class="glass p-6 rounded-3xl text-center">
-                <div class="w-20 h-20 bg-yellow-500 rounded-full mx-auto flex items-center justify-center mb-4"><i class="fas fa-user text-4xl text-black"></i></div>
-                <p class="text-xs text-gray-400 uppercase" id="lbl-prof-phone">Phone Number</p>
+            <div class="glass-card-glow p-6 rounded-3xl text-center">
+                <div class="w-20 h-20 bg-gradient-to-br from-emerald-500 to-green-700 rounded-full mx-auto flex items-center justify-center mb-4"><i class="fas fa-user text-4xl text-black"></i></div>
+                <p class="text-xs text-emerald-400 uppercase" id="lbl-prof-phone">Phone Number</p>
                 <p id="prof-phone" class="font-bold text-lg text-white mb-2"></p>
-                <p class="text-xs text-gray-400 uppercase" id="lbl-prof-id">Invitation Code</p>
-                <p id="prof-id" class="font-bold text-lg text-yellow-500"></p>
+                <p class="text-xs text-emerald-400 uppercase" id="lbl-prof-id">Invitation Code</p>
+                <p id="prof-id" class="font-bold text-lg text-emerald-300"></p>
             </div>
-            <div class="glass p-6 rounded-3xl space-y-3">
-                <p class="text-xs font-bold text-gray-400 uppercase">Bank Information</p>
-                <input type="text" id="bank-name-full" placeholder="Full Name" class="w-full bg-black/20 p-3 rounded-xl text-xs border border-white/10 outline-none">
-                <select id="bank-select" class="w-full bg-black/20 p-3 rounded-xl text-xs border border-white/10 outline-none">
+            <div class="glass-card-glow p-6 rounded-3xl space-y-3">
+                <p class="text-xs font-bold text-emerald-400 uppercase">Bank Information</p>
+                <input type="text" id="bank-name-full" placeholder="Full Name" class="w-full bg-black/20 p-3 rounded-xl text-xs border border-emerald-700/30 outline-none text-white">
+                <select id="bank-select" class="w-full bg-black/20 p-3 rounded-xl text-xs border border-emerald-700/30 outline-none text-white">
                     <option value="CBE">CBE</option><option value="Telebirr">Telebirr</option><option value="Abyssinia">Abyssinia</option>
                 </select>
-                <input type="text" id="bank-acc" placeholder="Account Number" class="w-full bg-black/20 p-3 rounded-xl text-xs border border-white/10 outline-none">
-                <input type="password" id="save-pin" placeholder="Withdrawal PIN" class="w-full bg-black/20 p-3 rounded-xl text-xs border border-white/10 outline-none">
-                <button onclick="saveBank()" class="w-full bg-blue-600 py-3 rounded-xl text-xs font-bold uppercase">Save Info</button>
+                <input type="text" id="bank-acc" placeholder="Account Number" class="w-full bg-black/20 p-3 rounded-xl text-xs border border-emerald-700/30 outline-none text-white">
+                <input type="password" id="save-pin" placeholder="Withdrawal PIN" class="w-full bg-black/20 p-3 rounded-xl text-xs border border-emerald-700/30 outline-none text-white">
+                <button onclick="saveBank()" class="w-full bg-emerald-700 py-3 rounded-xl text-xs font-bold uppercase text-white">Save Info</button>
             </div>
-            <button onclick="location.reload()" class="w-full bg-red-600/20 text-red-500 py-4 rounded-2xl text-sm font-bold border border-red-500/20">LOGOUT</button>
+            <button onclick="location.reload()" class="w-full bg-red-600/20 text-red-400 py-4 rounded-2xl text-sm font-bold border border-red-500/20">LOGOUT</button>
         </div>
 
-        <nav class="fixed bottom-0 left-0 right-0 glass flex justify-around py-4 z-50 rounded-t-3xl max-w-md mx-auto">
+        <nav class="fixed bottom-0 left-0 right-0 nav-bar-custom flex justify-around py-4 z-50 rounded-t-3xl max-w-md mx-auto">
             <button onclick="switchTab('home')" class="nav-btn nav-active text-center"><i class="fas fa-home"></i><p class="text-[9px]">Home</p></button>
             <button onclick="switchTab('rent')" class="nav-btn text-center"><i class="fas fa-building"></i><p class="text-[9px]">Rent</p></button>
             <button onclick="switchTab('wealth')" class="nav-btn text-center"><i class="fas fa-coins"></i><p class="text-[9px]">Wealth</p></button>
@@ -247,22 +385,22 @@
 
     <div id="withdraw-modal" class="fixed inset-0 bg-black/95 hidden z-[100] p-6">
         <div class="flex justify-between items-center mb-6"><h2>WITHDRAW</h2><button onclick="closeModal('withdraw')" class="text-3xl">&times;</button></div>
-        <p class="text-[10px] text-yellow-500 mb-4">Min: 200 ETB | Daily Limit: 3 times | Withdraw Fee: 10% | Sunday: Closed</p>
+        <p class="text-[10px] text-emerald-400 mb-4">Min: 200 ETB | Daily Limit: 3 times | Withdraw Fee: 10% | Sunday: Closed</p>
         <input type="number" id="wd-amt" placeholder="Amount" class="w-full p-4 rounded-xl text-black mb-4 outline-none">
         <input type="password" id="wd-pin-input" placeholder="Enter PIN" class="w-full p-4 rounded-xl text-black mb-4 outline-none">
-        <button onclick="processWithdraw()" class="w-full bg-yellow-500 text-black py-4 rounded-xl font-bold uppercase">Submit Withdrawal</button>
+        <button onclick="processWithdraw()" class="w-full btn-green py-4 rounded-xl font-bold uppercase">Submit Withdrawal</button>
     </div>
 
     <div id="deposit-modal" class="fixed inset-0 bg-black/95 hidden z-[100] p-6">
         <div class="flex justify-between items-center mb-6"><h2>DEPOSIT</h2><button onclick="closeModal('deposit')" class="text-3xl">&times;</button></div>
-        <div class="glass p-4 rounded-xl mb-4 text-sm">
+        <div class="glass-card-glow p-4 rounded-xl mb-4 text-sm">
             <p class="text-gray-400">Account Name: <span class="text-white font-bold">Yesewzer Dagnaw Alemu</span></p>
-            <p class="text-gray-400 mt-2">CBE Account: <span id="dep-acc-num" class="text-yellow-500 font-bold">1000418939498</span></p>
+            <p class="text-gray-400 mt-2">CBE Account: <span id="dep-acc-num" class="text-emerald-400 font-bold">1000418939498</span></p>
             <button onclick="copyAccount()" class="mt-2 text-[10px] bg-white/20 px-3 py-1 rounded">Copy Account</button>
         </div>
         <input type="number" id="dep-amt" placeholder="Amount" class="w-full p-4 rounded-xl text-black mb-4 outline-none">
         <input type="text" id="dep-ft" placeholder="FT Reference Number" class="w-full p-4 rounded-xl text-black mb-4 outline-none">
-        <button onclick="submitDeposit()" class="w-full bg-green-600 py-4 rounded-xl font-bold uppercase">Submit Deposit</button>
+        <button onclick="submitDeposit()" class="w-full bg-emerald-600 py-4 rounded-xl font-bold uppercase text-white">Submit Deposit</button>
     </div>
 
     <script type="module">
@@ -291,7 +429,6 @@
             { id: 3, members: 40, amount: 10000 },
             { id: 4, members: 80, amount: 20000 },
             { id: 5, members: 160, amount: 40000 }
-    
         ];
 
         const translations = {
@@ -302,12 +439,11 @@
         };
 
         const rentLevels = [
-        
-            {id: 1, price: 1500, daily: 1500 * 0.04, img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=200"},
-            {id: 2, price: 3000, daily: 3000 * 0.04, img: "https://images.unsplash.com/photo-1580587767373-197e37604439?w=200"},
-            {id: 3, price: 5000, daily: 5000 * 0.04, img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200"},
-            {id: 4, price: 10000, daily: 10000 * 0.04, img: "https://images.unsplash.com/photo-1600607687940-47a04b629b67?w=200"},
-            {id: 5, price: 20000, daily: 20000 * 0.04, img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=200"}
+            {id: 1, price: 1500, daily: 1500 * 0.10, img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=200"},
+            {id: 2, price: 3000, daily: 3000 * 0.10, img: "https://images.unsplash.com/photo-1580587767373-197e37604439?w=200"},
+            {id: 3, price: 5000, daily: 5000 * 0.10, img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200"},
+            {id: 4, price: 10000, daily: 10000 * 0.10, img: "https://images.unsplash.com/photo-1600607687940-47a04b629b67?w=200"},
+            {id: 5, price: 20000, daily: 20000 * 0.10, img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=200"}
         ];
 
         let countdownInterval = null;
@@ -325,8 +461,6 @@
                 }
             }
             generateCaptcha();
-            generateLiveTransactions();
-            renderInvestmentTable();
             
             setInterval(() => {
                 const now = new Date();
@@ -380,8 +514,8 @@
         window.toggleAuth = (m) => {
             document.getElementById('reg-form').classList.toggle('hidden', m === 'login');
             document.getElementById('login-form').classList.toggle('hidden', m === 'reg');
-            document.getElementById('reg-btn').className = m === 'reg' ? 'text-xl font-bold border-b-4 border-yellow-500' : 'text-xl font-bold opacity-50';
-            document.getElementById('login-btn').className = m === 'login' ? 'text-xl font-bold border-b-4 border-yellow-500' : 'text-xl font-bold opacity-50';
+            document.getElementById('reg-btn').className = m === 'reg' ? 'text-xl font-bold border-b-4 border-emerald-400' : 'text-xl font-bold opacity-50';
+            document.getElementById('login-btn').className = m === 'login' ? 'text-xl font-bold border-b-4 border-emerald-400' : 'text-xl font-bold opacity-50';
         };
 
         window.generateCaptcha = () => {
@@ -489,7 +623,7 @@
             salaryRules.forEach(r => {
                 const isClaimed = (userData.claimedLevels || []).includes(r.id);
                 const canClaim = levelACount >= r.members && !isClaimed;
-                sHtml += `<div class="glass p-3 rounded-xl flex justify-between items-center"><div class="text-left"><p class="font-bold text-yellow-500">Salary Lvl ${r.id}</p><p class="text-[9px] opacity-60">${levelACount}/${r.members} Active A-Members</p><p class="text-[10px] text-green-400">${r.amount} ETB</p></div><button onclick="claimSalary(${r.id}, ${r.amount}, ${r.members}, ${levelACount})" class="px-4 py-1 rounded-lg text-[10px] font-bold ${canClaim ? 'bg-green-600' : 'bg-gray-700 opacity-50'}" ${!canClaim ? 'disabled' : ''}>${isClaimed ? 'CLAIMED' : 'CLAIM'}</button></div>`;
+                sHtml += `<div class="glass-card-glow p-3 rounded-xl flex justify-between items-center"><div class="text-left"><p class="font-bold text-emerald-400">Salary Lvl ${r.id}</p><p class="text-[9px] opacity-60">${levelACount}/${r.members} Active A-Members</p><p class="text-[10px] text-green-400">${r.amount} ETB</p></div><button onclick="claimSalary(${r.id}, ${r.amount}, ${r.members}, ${levelACount})" class="px-4 py-1 rounded-lg text-[10px] font-bold ${canClaim ? 'btn-green' : 'bg-gray-700 opacity-50'}" ${!canClaim ? 'disabled' : ''}>${isClaimed ? 'CLAIMED' : 'CLAIM'}</button></div>`;
             });
             document.getElementById('salary-list').innerHTML = sHtml;
         }
@@ -589,7 +723,7 @@
                 snap.forEach(child => {
                     const r = child.val();
                     const statusColor = r.status === "Approved" ? "text-green-400" : (r.status === "Rejected" ? "text-red-400" : "text-yellow-500");
-                    html = `<div class="glass p-3 rounded-xl flex justify-between text-xs"><div><p class="font-bold">${r.type}</p><p class="text-[10px] text-gray-400">${r.date} ${r.ft ? '| FT: '+r.ft : ''}</p></div><div class="text-right"><p class="font-bold text-yellow-500">${r.amount} ETB</p><p class="${statusColor} text-[10px] font-bold">${r.status}</p></div></div>` + html;
+                    html = `<div class="glass-card-glow p-3 rounded-xl flex justify-between text-xs"><div><p class="font-bold">${r.type}</p><p class="text-[10px] text-gray-400">${r.date} ${r.ft ? '| FT: '+r.ft : ''}</p></div><div class="text-right"><p class="font-bold text-emerald-400">${r.amount} ETB</p><p class="${statusColor} text-[10px] font-bold">${r.status}</p></div></div>` + html;
                 });
                 list.innerHTML = html;
             });
@@ -650,22 +784,12 @@
             }
         }
 
-        function renderInvestmentTable() {
-            const body = document.getElementById('inv-table-body');
-            if(!body) return;
-            let html = "";
-            rentLevels.forEach(l => {
-                html += `<tr class="border-b border-white/10"><td class="p-2 font-bold text-yellow-500">VIP ${l.id}</td><td class="p-2">${l.price} ETB</td><td class="p-2 text-green-400">${l.daily.toFixed(2)} ETB</td></tr>`;
-            });
-            body.innerHTML = html;
-        }
-
         function renderRent() {
             const grid = document.getElementById('rent-grid');
             if(!grid) return;
             let html = "";
             rentLevels.forEach(l => {
-                html += `<div class="glass p-4 rounded-3xl flex gap-4 items-center"><img src="${l.img}" class="w-20 h-20 rounded-2xl object-cover border border-white/10"><div class="flex-1"><h4 class="font-bold text-yellow-500 text-sm">HR VIP HOUSE ${l.id}</h4><p class="text-[11px] text-gray-400 mt-1">Price: <span class="text-white font-bold">${l.price} ETB</span></p><p class="text-[11px] text-gray-400">Daily: <span class="text-green-400 font-bold">${l.daily.toFixed(2)} ETB / Day</span></p><button onclick="buyVIP(${l.id}, ${l.price})" class="mt-2 w-full bg-yellow-500 text-black font-bold py-1.5 rounded-xl text-xs uppercase">Rent Now</button></div></div>`;
+                html += `<div class="glass-card-glow p-4 rounded-3xl flex gap-4 items-center"><img src="${l.img}" class="w-20 h-20 rounded-2xl object-cover border border-emerald-700/30"><div class="flex-1"><h4 class="font-bold text-emerald-300 text-sm">HR VIP HOUSE ${l.id}</h4><p class="text-[11px] text-gray-400 mt-1">Price: <span class="text-white font-bold">${l.price} ETB</span></p><p class="text-[11px] text-gray-400">Daily: <span class="text-green-400 font-bold">${l.daily.toFixed(2)} ETB / Day</span></p><button onclick="buyVIP(${l.id}, ${l.price})" class="mt-2 w-full btn-green font-bold py-1.5 rounded-xl text-xs uppercase">Rent Now</button></div></div>`;
             });
             grid.innerHTML = html;
         }
@@ -770,31 +894,6 @@
                 }
             }
         };
-
-        function generateLiveTransactions() {
-            const ticker = document.getElementById('live-ticker');
-            if(!ticker) return;
-            const prefixes = ["091", "092", "093", "094", "090", "097", "096"];
-            const types = ["Deposited", "Withdrawn"];
-            let html = "";
-            
-            for(let i=0; i<30; i++) {
-                const phone = prefixes[Math.floor(Math.random()*prefixes.length)] + "***" + Math.floor(1000 + Math.random()*9000);
-                const type = types[Math.floor(Math.random()*types.length)];
-                const amount = type === "Deposited" ? Math.floor(1500 + Math.random()*20000) : Math.floor(200 + Math.random()*5000);
-                const color = type === "Deposited" ? "text-green-400" : "text-red-400";
-                const icon = type === "Deposited" ? "fa-arrow-alt-circle-up" : "fa-arrow-alt-circle-down";
-                
-                html += `<div class="flex justify-between items-center text-[10px] bg-white/5 p-2 rounded-xl border border-white/5">
-                            <div class="flex items-center gap-2">
-                                <i class="fas ${icon} ${color}"></i>
-                                <span class="font-bold text-gray-300">${phone}</span>
-                            </div>
-                            <span class="${color} font-black">${type}: ${amount} ETB</span>
-                         </div>`;
-            }
-            ticker.innerHTML = html + html; 
-        }
     </script>
 </body>
 </html>
