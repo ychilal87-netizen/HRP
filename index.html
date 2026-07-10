@@ -50,7 +50,7 @@
 </head>
 <body class="pb-32">
 
-    <!-- Floating Transactions (Hidden by default) -->
+    <!-- Floating Transactions -->
     <div id="floating-trans" class="floating-trans-btn" onclick="showModal('transactions')">
         <i class="fas fa-chart-pie mr-2"></i> Transactions
     </div>
@@ -66,7 +66,7 @@
     <!-- Auth Section -->
     <section id="auth-section" class="max-w-md mx-auto mt-10 p-8 glass-card mx-4 shadow-2xl">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-black italic rainbow-text">ROBOT RENT</h1>
+            <h1 class="text-3xl font-black italic rainbow-text">ROBOT RENT PRO</h1>
             <p class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.5em]">Global AI Network</p>
         </div>
 
@@ -79,7 +79,7 @@
             <input type="number" id="reg-phone" placeholder="Phone 9..." class="w-full p-4 rounded-2xl bg-white border border-gray-100 outline-none font-bold">
             <input type="password" id="reg-pass" placeholder="Password" class="w-full p-4 rounded-2xl bg-white border border-gray-100 outline-none">
             <input type="password" id="reg-pin" placeholder="Withdraw PIN" class="w-full p-4 rounded-2xl bg-white border border-gray-100 outline-none">
-            <input type="text" id="reg-invite" placeholder="Invite Code (ROBOTRENT...)" class="w-full p-4 rounded-2xl bg-white border border-blue-100 outline-none font-black text-blue-600 uppercase">
+            <input type="text" id="reg-invite" placeholder="Invite Code" class="w-full p-4 rounded-2xl bg-white border border-blue-100 outline-none font-black text-blue-600 uppercase">
             <button onclick="handleRegister()" class="w-full py-5 rounded-2xl bg-blue-600 text-white font-black shadow-lg hover:bg-blue-700 transition-all">INITIALIZE NODE</button>
         </div>
 
@@ -199,7 +199,6 @@
     </main>
 
     <!-- Modals -->
-    <!-- Transactions Modal -->
     <div id="transactions-modal" class="fixed inset-0 bg-black/60 backdrop-blur-md hidden z-[200] flex items-center justify-center p-6">
         <div class="glass-card w-full max-w-md h-[80vh] flex flex-col p-8 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)]">
             <div class="flex justify-between items-center mb-6">
@@ -278,6 +277,16 @@
             { id: 4, members: 80, amount: 20000 },
             { id: 5, members: 160, amount: 40000 }
         ];
+
+        // --- Auto-Fill Invite Code Logic ---
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('rf');
+            if (refCode) {
+                const inviteInput = document.getElementById('reg-invite');
+                if (inviteInput) inviteInput.value = refCode.toUpperCase();
+            }
+        });
 
         window.toggleAuth = (m) => {
             document.getElementById('reg-form').classList.toggle('hidden', m === 'login');
@@ -381,7 +390,6 @@
             await update(ref(db, `users/${currentUser}`), { balance: (userData.balance || 0) - price, vip: id });
             await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Deployment", amount: price, status: "Approved", date: new Date().toLocaleDateString(), time: new Date().toLocaleTimeString() });
             
-            // Commissions Logic (15%, 2%, 1%)
             const rates = [0.15, 0.02, 0.01];
             let inviter = userData.inviteBy;
             const usersSnap = await get(ref(db, 'users'));
@@ -408,7 +416,6 @@
             await update(ref(db, `users/${currentUser}`), { balance: (userData.balance || 0) + profit, lastCollect: now });
             await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Daily Mining Sync", amount: profit, status: "Approved", date: new Date().toLocaleDateString(), time: new Date().toLocaleTimeString() });
             
-            // Income Comm (4%, 2%, 1%)
             const rates = [0.04, 0.02, 0.01];
             let inviter = userData.inviteBy;
             const usersSnap = await get(ref(db, 'users'));
@@ -446,7 +453,7 @@
                                 <span class="${statusClass}">${statusText}</span>
                             </div>
                         </div>`;
-                    if(r.type.includes("Recharge") || r.type.includes("Deployment")) depList.innerHTML = item + depList.innerHTML;
+                    if(r.type.includes("Recharge") || r.type.includes("Deployment") || r.type.includes("Salary") || r.type.includes("Commission")) depList.innerHTML = item + depList.innerHTML;
                     else if(r.type.includes("Withdraw")) wdList.innerHTML = item + wdList.innerHTML;
                 });
             });
