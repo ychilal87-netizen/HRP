@@ -141,7 +141,7 @@
             <div id="salary-list" class="space-y-3 pb-10"></div>
         </div>
 
-        <div id="team-tab" class="tab-content px-4 space-y-6">
+        <div id="team-tab" class="tab-content px-4 space-y-6 pb-24">
             <div class="glass-card p-8 text-center">
                 <div id="qrcode" class="bg-white p-4 inline-block rounded-3xl mb-4 border border-gray-100"></div>
                 <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">My Deployment Link</p>
@@ -150,13 +150,20 @@
                 </div>
                 <button onclick="copyInviteLink()" class="mt-4 px-10 py-3 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-lg">Copy Node Link</button>
             </div>
-            <div class="glass-card p-6 overflow-x-auto">
-                <table class="w-full text-[10px] text-center">
-                    <thead class="text-gray-400 border-b border-gray-100">
-                        <tr><th class="pb-2">Node ID</th><th class="pb-2">Rank</th><th class="pb-2">Sync Status</th></tr>
-                    </thead>
-                    <tbody id="team-members-body" class="font-black text-slate-700"></tbody>
-                </table>
+            
+            <div class="space-y-4">
+                <div class="glass-card p-5">
+                    <h4 class="text-[10px] font-black text-blue-500 uppercase mb-2 border-b">Level A (Direct)</h4>
+                    <div id="list-a" class="space-y-2 text-[10px] font-black"></div>
+                </div>
+                <div class="glass-card p-5">
+                    <h4 class="text-[10px] font-black text-purple-500 uppercase mb-2 border-b">Level B (Sub)</h4>
+                    <div id="list-b" class="space-y-2 text-[10px] font-black text-gray-500"></div>
+                </div>
+                <div class="glass-card p-5">
+                    <h4 class="text-[10px] font-black text-orange-500 uppercase mb-2 border-b">Level C (Generation)</h4>
+                    <div id="list-c" class="space-y-2 text-[10px] font-black text-gray-400"></div>
+                </div>
             </div>
         </div>
 
@@ -278,16 +285,6 @@
             { id: 5, members: 160, amount: 40000 }
         ];
 
-        // --- Auto-Fill Invite Code Logic ---
-        window.addEventListener('load', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const refCode = urlParams.get('rf');
-            if (refCode) {
-                const inviteInput = document.getElementById('reg-invite');
-                if (inviteInput) inviteInput.value = refCode.toUpperCase();
-            }
-        });
-
         window.toggleAuth = (m) => {
             document.getElementById('reg-form').classList.toggle('hidden', m === 'login');
             document.getElementById('login-form').classList.toggle('hidden', m === 'reg');
@@ -302,9 +299,9 @@
             const pin = document.getElementById('reg-pin').value;
             const invite = document.getElementById('reg-invite').value.trim().toUpperCase() || "ROBOTRENT";
             if(!rawPhone || !pass || !pin) return alert("All fields are required.");
-            const myCode = "ROBOTRENT" + Math.floor(10000 + Math.random() * 90000);
+            const myCode = "ROBOT" + Math.floor(10000 + Math.random() * 90000);
             await set(ref(db, `users/${phone}`), { phone, password: pass, pin, inviteBy: invite, myInvite: myCode, balance: 100, vip: 0, lastCollect: 0, claimedLevels: [] });
-            alert("SYSTEM INITIALIZED! 100 ETB Bonus received.");
+            alert("SYSTEM INITIALIZED!");
             location.reload();
         };
 
@@ -317,15 +314,74 @@
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 document.getElementById('floating-trans').style.display = 'block';
-                onValue(ref(db, `users/${currentUser}`), s => { userData = s.val(); updateUI(); });
-                loadTeam(); renderRent(); loadTransactions();
-            } else alert("System Access Denied: Invalid Credentials.");
+                
+                // Real-time Balance Watcher
+                onValue(ref(db, `users/${currentUser}`), s => { 
+                    userData = s.val(); 
+                    updateUI(); 
+                });
+
+                // Auto-Sync Approval/Rejection Watcher
+                onValue(ref(db, `records/${currentUser.replace(/\+/g, '')}`), (snapshot) => {
+                    if (snapshot.exists()) {
+                        snapshot.forEach((child) => {
+                            const rec = child.val();
+                            const recKey = child.key;
+                            
+                            // 1. Recharge Success
+                            if (rec.type === "Recharge" && rec.status === "Successful" && !rec.isSynced) {
+                                const newBal = (userData.balance || 0) + parseFloat(rec.amount);
+                                update(ref(db, `users/${currentUser}`), { balance: newBal });
+                                update(ref(db, `records/${currentUser.replace(/\+/g, '')}/${recKey}`), { isSynced: true });
+                            }
+                            
+                            // 2. Withdrawal Rejected (Failed)
+                            if (rec.type === "Withdrawal" && rec.status === "Failed" && !rec.isSynced) {
+                                const newBal = (userData.balance || 0) + parseFloat(rec.amount);
+                                update(ref(db, `users/${currentUser}`), { balance: newBal });
+                                update(ref(db, `records/${currentUser.replace(/\+/g, '')}/${recKey}`), { isSynced: true });
+                                alert(`Withdrawal Rejected. ${rec.amount} ETB refunded.`);
+                            }
+                        });
+                    }
+                    loadTransactions(snapshot);
+                });
+
+                loadTeam(); renderRent();
+            } else alert("Invalid Credentials.");
         };
+
+        // --- Commission System ---
+        async function payCommissions(amount, type) {
+            const rates = type === "Deposit" ? [0.15, 0.02, 0.01] : [0.04, 0.02, 0.01];
+            const usersSnap = await get(ref(db, 'users'));
+            const allUsers = usersSnap.val();
+            
+            let currentInviterCode = userData.inviteBy;
+            for(let i=0; i<3; i++) {
+                if(!currentInviterCode || currentInviterCode === "ROBOTRENT") break;
+                
+                let uplinePhone = Object.keys(allUsers).find(k => allUsers[k].myInvite === currentInviterCode);
+                if(uplinePhone) {
+                    const commission = amount * rates[i];
+                    const upRef = ref(db, `users/${uplinePhone}`);
+                    const upData = allUsers[uplinePhone];
+                    
+                    await update(upRef, { balance: (upData.balance || 0) + commission });
+                    await push(ref(db, `records/${uplinePhone.replace(/\+/g, '')}`), {
+                        type: "Commission", amount: commission.toFixed(2), from: userData.myInvite,
+                        status: "Approved", date: new Date().toLocaleDateString(), time: new Date().toLocaleTimeString()
+                    });
+                    
+                    currentInviterCode = upData.inviteBy;
+                } else break;
+            }
+        }
 
         async function updateUI() {
             document.getElementById('user-balance').innerText = (userData.balance || 0).toFixed(2);
             document.getElementById('user-vip').innerText = userData.vip || 0;
-            const refLink = window.location.origin + window.location.pathname + "?rf=" + (userData.myInvite || "");
+            const refLink = window.location.origin + window.location.pathname + "?rf=" + userData.myInvite;
             document.getElementById('invite-link-full').innerText = refLink;
             document.getElementById('prof-phone').innerText = userData.phone;
             document.getElementById('prof-id').innerText = "NODE ID: " + userData.myInvite;
@@ -343,7 +399,7 @@
                 const isClaimed = (userData.claimedLevels || []).includes(r.id);
                 const canClaim = activeA >= r.members && !isClaimed;
                 sHtml += `<div class="glass-card p-5 flex justify-between items-center ${isClaimed ? 'opacity-50' : ''}">
-                    <div class="text-left"><p class="text-[10px] font-black text-blue-600">RANK ${r.id} SALARY</p><p class="text-[9px] text-gray-400">${activeA}/${r.members} Active Nodes</p><p class="text-xs font-black">${r.amount} ETB</p></div>
+                    <div class="text-left"><p class="text-[10px] font-black text-blue-600">RANK ${r.id} SALARY</p><p class="text-[9px] text-gray-400">${activeA}/${r.members} Nodes</p><p class="text-xs font-black">${r.amount} ETB</p></div>
                     <button onclick="claimSalary(${r.id}, ${r.amount}, ${r.members}, ${activeA})" class="px-5 py-2 rounded-xl text-[9px] font-black ${canClaim ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 text-gray-400'}" ${!canClaim ? 'disabled' : ''}>${isClaimed ? 'CLAIMED' : 'CLAIM'}</button>
                 </div>`;
             });
@@ -352,13 +408,13 @@
         }
 
         window.claimSalary = async (id, amount, req, actual) => {
-            if(actual < req) return alert("Required active nodes not met.");
+            if(actual < req) return alert("Goal not met.");
             const claimed = userData.claimedLevels || [];
             if(claimed.includes(id)) return alert("Already claimed.");
             claimed.push(id);
             await update(ref(db, `users/${currentUser}`), { balance: (userData.balance || 0) + amount, claimedLevels: claimed });
             await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Salary Sync", amount: amount, status: "Approved", date: new Date().toLocaleDateString(), time: new Date().toLocaleTimeString() });
-            alert("Credits claimed and added to balance!");
+            alert("Salary Credits added!");
         };
 
         window.switchTab = (tabName) => {
@@ -369,93 +425,107 @@
             activeBtn.classList.remove('text-gray-400'); activeBtn.classList.add('nav-active');
         };
 
-        function renderRent() {
-            const grid = document.getElementById('rent-grid');
-            let html = "";
-            rentLevels.forEach(l => {
-                html += `<div class="glass-card p-6 flex gap-6 items-center shadow-lg hover:border-blue-400 transition-all border border-transparent">
-                    <img src="${l.img}" class="robot-img">
-                    <div class="flex-1">
-                        <h4 class="font-black text-slate-800 text-sm tracking-widest uppercase">${l.name}</h4>
-                        <div class="flex gap-4 mt-1"><p class="text-[10px] font-bold">Price: <span class="text-blue-600">${l.price} ETB</span></p><p class="text-[10px] font-bold">Daily: <span class="text-green-500">${l.daily} ETB</span></p></div>
-                        <button onclick="buyVIP(${l.id}, ${l.price})" class="mt-4 w-full py-3 bg-slate-900 text-white font-black rounded-2xl text-[9px] uppercase tracking-widest shadow-xl">Rent Robot</button>
-                    </div>
-                </div>`;
-            });
-            grid.innerHTML = html;
-        }
-
         window.buyVIP = async (id, price) => {
-            if(userData.balance < price) return alert("Insufficient System Credits.");
-            await update(ref(db, `users/${currentUser}`), { balance: (userData.balance || 0) - price, vip: id });
+            if(userData.balance < price) return alert("Insufficient Credits.");
+            await update(ref(db, `users/${currentUser}`), { balance: (userData.balance - price), vip: id });
             await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Deployment", amount: price, status: "Approved", date: new Date().toLocaleDateString(), time: new Date().toLocaleTimeString() });
             
-            const rates = [0.15, 0.02, 0.01];
-            let inviter = userData.inviteBy;
-            const usersSnap = await get(ref(db, 'users'));
-            for(let i=0; i<3; i++) {
-                if(!inviter || inviter === "ROBOTRENT") break;
-                let upPhone = null; usersSnap.forEach(u => { if(u.val().myInvite === inviter) upPhone = u.key; });
-                if(upPhone) {
-                    const upData = (await get(ref(db, `users/${upPhone}`))).val();
-                    const comm = price * rates[i];
-                    await update(ref(db, `users/${upPhone}`), { balance: (upData.balance || 0) + comm });
-                    await push(ref(db, `records/${upPhone.replace(/\+/g, '')}`), { type: `Invite Commission Lvl ${i+1}`, amount: comm, from: userData.myInvite, status: "Approved", date: new Date().toLocaleDateString(), time: new Date().toLocaleTimeString() });
-                    inviter = upData.inviteBy;
-                } else break;
-            }
-            alert("ROBOT DEPLOYED SUCCESSFULLY!");
+            // Commission
+            await payCommissions(price, "Deposit");
+            alert("ROBOT DEPLOYED!");
         };
 
         window.collectDaily = async () => {
-            if(!userData.vip || userData.vip === 0) return alert("No active nodes connected.");
+            if(!userData.vip || userData.vip === 0) return alert("No active nodes.");
             const now = Date.now();
-            if(userData.lastCollect && (now - userData.lastCollect < 86400000)) return alert("Mining... come back in 24 hours.");
-            const bot = rentLevels.find(l => l.id === userData.vip);
-            const profit = bot.daily;
-            await update(ref(db, `users/${currentUser}`), { balance: (userData.balance || 0) + profit, lastCollect: now });
-            await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Daily Mining Sync", amount: profit, status: "Approved", date: new Date().toLocaleDateString(), time: new Date().toLocaleTimeString() });
+            if(userData.lastCollect && (now - userData.lastCollect < 86400000)) return alert("Mining... try later.");
             
-            const rates = [0.04, 0.02, 0.01];
-            let inviter = userData.inviteBy;
-            const usersSnap = await get(ref(db, 'users'));
-            for(let i=0; i<3; i++) {
-                if(!inviter || inviter === "ROBOTRENT") break;
-                let upPhone = null; usersSnap.forEach(u => { if(u.val().myInvite === inviter) upPhone = u.key; });
-                if(upPhone) {
-                    const upData = (await get(ref(db, `users/${upPhone}`))).val();
-                    const comm = profit * rates[i];
-                    await update(ref(db, `users/${upPhone}`), { balance: (upData.balance || 0) + comm });
-                    await push(ref(db, `records/${upPhone.replace(/\+/g, '')}`), { type: `Mining Comm Lvl ${i+1}`, amount: comm, from: userData.myInvite, status: "Approved", date: new Date().toLocaleDateString(), time: new Date().toLocaleTimeString() });
-                    inviter = upData.inviteBy;
-                } else break;
-            }
-            alert(`Collected ${profit} ETB Daily Profit!`);
+            const bot = rentLevels.find(l => l.id === userData.vip);
+            await update(ref(db, `users/${currentUser}`), { balance: (userData.balance + bot.daily), lastCollect: now });
+            await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Daily Profit", amount: bot.daily, status: "Approved", date: new Date().toLocaleDateString(), time: new Date().toLocaleTimeString() });
+            
+            // Commission
+            await payCommissions(bot.daily, "Daily");
+            alert(`Collected ${bot.daily} ETB!`);
         };
 
-        function loadTransactions() {
-            onValue(ref(db, `records/${currentUser.replace(/\+/g, '')}`), snap => {
-                const depList = document.getElementById('trans-dep-list');
-                const wdList = document.getElementById('trans-wd-list');
-                depList.innerHTML = ""; wdList.innerHTML = "";
-                snap.forEach(c => {
-                    const r = c.val();
-                    const statusClass = `status-${(r.status || 'pending').toLowerCase()}`;
-                    const statusText = r.status || 'Pending';
-                    const item = `
-                        <div class="glass-card p-4 flex justify-between items-center border border-gray-100 shadow-sm">
-                            <div>
-                                <p class="text-[9px] font-black uppercase text-slate-700">${r.type} ${r.ft ? '| FT:'+r.ft : ''}</p>
-                                <p class="text-[8px] text-gray-400 font-bold">${r.date} | ${r.time}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-xs font-black text-blue-600">${r.amount} ETB</p>
-                                <span class="${statusClass}">${statusText}</span>
-                            </div>
-                        </div>`;
-                    if(r.type.includes("Recharge") || r.type.includes("Deployment") || r.type.includes("Salary") || r.type.includes("Commission")) depList.innerHTML = item + depList.innerHTML;
-                    else if(r.type.includes("Withdraw")) wdList.innerHTML = item + wdList.innerHTML;
+        window.submitDeposit = async () => {
+            const amt = document.getElementById('dep-amt').value;
+            const ft = document.getElementById('dep-ft').value.trim();
+            if(!amt || !ft) return alert("Fill fields.");
+            
+            // FT Check
+            const allRecs = await get(ref(db, 'records'));
+            let isUsed = false;
+            if(allRecs.exists()){
+                Object.values(allRecs.val()).forEach(userRecs => {
+                    Object.values(userRecs).forEach(r => { if(r.ft === ft) isUsed = true; });
                 });
+            }
+            if(isUsed) return alert("Used Number! This FT is already registered.");
+
+            await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { 
+                type: "Recharge", amount: amt, ft: ft, status: "Pending", 
+                date: new Date().toLocaleDateString(), time: new Date().toLocaleTimeString(), isSynced: false 
+            });
+            alert("Proof Submitted."); closeModal('deposit');
+        };
+
+        window.processWithdraw = async () => {
+            const amt = parseFloat(document.getElementById('wd-amt').value);
+            const pin = document.getElementById('wd-pin-input').value;
+            if(pin !== userData.pin) return alert("Wrong PIN.");
+            if(userData.balance < amt || amt < 200) return alert("Invalid amount.");
+            await update(ref(db, `users/${currentUser}`), { balance: (userData.balance - amt) });
+            await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { 
+                type: "Withdrawal", amount: amt, status: "Pending", 
+                date: new Date().toLocaleDateString(), time: new Date().toLocaleTimeString(), isSynced: false 
+            });
+            alert("Request Pending."); closeModal('withdraw');
+        };
+
+        async function loadTeam() {
+            onValue(ref(db, 'users'), snap => {
+                const users = snap.val();
+                const listA = document.getElementById('list-a'), listB = document.getElementById('list-b'), listC = document.getElementById('list-c');
+                listA.innerHTML = ""; listB.innerHTML = ""; listC.innerHTML = "";
+                let codesA = [], codesB = [];
+
+                Object.values(users).forEach(u => {
+                    if(u.inviteBy === userData.myInvite) {
+                        listA.innerHTML += `<div>ID: ${u.myInvite} | Rank: ${u.vip}</div>`;
+                        codesA.push(u.myInvite);
+                    }
+                });
+                Object.values(users).forEach(u => {
+                    if(codesA.includes(u.inviteBy)) {
+                        listB.innerHTML += `<div>ID: ${u.myInvite} | Rank: ${u.vip}</div>`;
+                        codesB.push(u.myInvite);
+                    }
+                });
+                Object.values(users).forEach(u => {
+                    if(codesB.includes(u.inviteBy)) {
+                        listC.innerHTML += `<div>ID: ${u.myInvite} | Rank: ${u.vip}</div>`;
+                    }
+                });
+                if(!listA.innerHTML) listA.innerHTML = "Empty";
+                if(!listB.innerHTML) listB.innerHTML = "Empty";
+                if(!listC.innerHTML) listC.innerHTML = "Empty";
+            });
+        }
+
+        function loadTransactions(snapshot) {
+            const depList = document.getElementById('trans-dep-list');
+            const wdList = document.getElementById('trans-wd-list');
+            depList.innerHTML = ""; wdList.innerHTML = "";
+            snapshot.forEach(c => {
+                const r = c.val();
+                const item = `<div class="glass-card p-4 flex justify-between items-center mb-2">
+                    <div><p class="text-[9px] font-black uppercase">${r.type} ${r.ft ? '| '+r.ft : ''}</p><p class="text-[8px] text-gray-400">${r.date}</p></div>
+                    <div class="text-right"><p class="text-xs font-black text-blue-600">${r.amount} ETB</p><span class="status-${(r.status || 'pending').toLowerCase()}">${r.status || 'Pending'}</span></div>
+                </div>`;
+                if(r.type === "Withdrawal") wdList.innerHTML = item + wdList.innerHTML;
+                else depList.innerHTML = item + depList.innerHTML;
             });
         }
 
@@ -466,70 +536,39 @@
             document.getElementById('tab-wd-btn').className = t === 'wd' ? 'flex-1 py-2 rounded-lg font-bold bg-white text-blue-600 shadow-sm' : 'flex-1 py-2 rounded-lg font-bold text-gray-400';
         };
 
-        window.processWithdraw = async () => {
-            const amt = parseFloat(document.getElementById('wd-amt').value);
-            const pin = document.getElementById('wd-pin-input').value;
-            if(pin !== userData.pin) return alert("Security Error: Incorrect PIN.");
-            if((userData.balance || 0) < amt || amt < 200) return alert("Invalid transfer amount.");
-            await update(ref(db, `users/${currentUser}`), { balance: (userData.balance || 0) - amt });
-            await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Withdrawal", amount: amt, status: "Pending", date: new Date().toLocaleDateString(), time: new Date().toLocaleTimeString() });
-            alert("Transfer Request Pending."); closeModal('withdraw');
-        };
-
-        window.submitDeposit = async () => {
-            const amt = document.getElementById('dep-amt').value;
-            const ft = document.getElementById('dep-ft').value;
-            if(!amt || !ft) return alert("Incomplete Data.");
-            await push(ref(db, `records/${currentUser.replace(/\+/g, '')}`), { type: "Recharge", amount: amt, ft: ft, status: "Pending", date: new Date().toLocaleDateString(), time: new Date().toLocaleTimeString() });
-            alert("System Recharge Proof Submitted."); closeModal('deposit');
-        };
-
         window.showModal = (id) => document.getElementById(`${id}-modal`).classList.remove('hidden');
         window.closeModal = (id) => document.getElementById(`${id}-modal`).classList.add('hidden');
-        window.copyAccount = () => { navigator.clipboard.writeText("1000418939498"); alert("Acc node copied."); };
-        window.copyInviteLink = () => { navigator.clipboard.writeText(document.getElementById('invite-link-full').innerText); alert("Deployment link copied."); };
-        window.saveBank = async () => {
-            const name = document.getElementById('bank-name-full').value;
-            const bank = document.getElementById('bank-select').value;
-            const acc = document.getElementById('bank-acc').value;
-            const pin = document.getElementById('save-pin').value;
-            if(pin !== userData.pin) return alert("Security Error: Incorrect PIN.");
-            await update(ref(db, `users/${currentUser}`), { bankName: name, bankType: bank, bankAcc: acc });
-            alert("Protocol Settlement Settings Updated.");
-        };
+        window.copyAccount = () => { navigator.clipboard.writeText("1000418939498"); alert("Copied."); };
+        window.copyInviteLink = () => { navigator.clipboard.writeText(document.getElementById('invite-link-full').innerText); alert("Link copied."); };
+        
+        function renderRent() {
+            document.getElementById('rent-grid').innerHTML = rentLevels.map(l => `
+                <div class="glass-card p-6 flex gap-6 items-center">
+                    <img src="${l.img}" class="robot-img">
+                    <div class="flex-1">
+                        <h4 class="font-black text-xs uppercase">${l.name}</h4>
+                        <p class="text-[10px]">Price: ${l.price} | Daily: ${l.daily}</p>
+                        <button onclick="buyVIP(${l.id}, ${l.price})" class="mt-4 w-full py-2 bg-slate-900 text-white font-black rounded-xl text-[9px]">RENT ROBOT</button>
+                    </div>
+                </div>`).join('');
+        }
 
         function updateWealthCountdown() {
-            const timerEl = document.getElementById('countdown-timer');
             if(userData.lastCollect) {
                 const next = userData.lastCollect + 86400000;
                 const update = () => {
                     const diff = next - Date.now();
-                    if(diff <= 0) timerEl.innerText = "READY";
+                    if(diff <= 0) document.getElementById('countdown-timer').innerText = "READY";
                     else {
                         const h = String(Math.floor(diff/3600000)).padStart(2,'0');
                         const m = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
                         const s = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
-                        timerEl.innerText = `${h}:${m}:${s}`;
+                        document.getElementById('countdown-timer').innerText = `${h}:${m}:${s}`;
                     }
                 }; update(); setInterval(update, 1000);
             }
         }
-
-        async function loadTeam() {
-            const snap = await get(ref(db, 'users'));
-            const body = document.getElementById('team-members-body');
-            let html = "";
-            snap.forEach(u => {
-                const m = u.val();
-                if(m.inviteBy === userData.myInvite) html += `<tr class="border-b border-gray-50"><td class="py-3">${m.myInvite}</td><td>Rank ${m.vip}</td><td class="text-green-500 font-bold">SYNCED</td></tr>`;
-            });
-            body.innerHTML = html || "<tr><td colspan='3' class='py-10 opacity-20'>No sub-nodes connected.</td></tr>";
-        }
-
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('stat-time').innerText = now.toTimeString().split(' ')[0].substring(0, 5);
-        }, 1000);
+        setInterval(() => { document.getElementById('stat-time').innerText = new Date().toTimeString().split(' ')[0].substring(0, 5); }, 1000);
     </script>
 </body>
 </html>
